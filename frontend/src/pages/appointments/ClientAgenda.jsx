@@ -16,7 +16,7 @@ function TabButton({ active, onClick, children }) {
       onClick={onClick}
       className={`border-b-2 px-1 pb-3 text-sm font-medium transition ${
         active
-          ? 'border-orange-500 text-orange-400'
+          ? 'border-gold-500 text-gold-400'
           : 'border-transparent text-neutral-500 hover:text-neutral-300'
       }`}
     >
@@ -91,7 +91,7 @@ function MyAppointments() {
               {cita.notas && <p className="mt-1 text-xs text-neutral-500">{cita.notas}</p>}
             </div>
             <div className="flex items-center gap-3">
-              <p className="text-sm font-semibold text-orange-500">
+              <p className="text-sm font-semibold text-gold-500">
                 {formatPrice(cita.servicio_precio)}
               </p>
               <EstadoBadge estado={cita.estado} />
@@ -118,7 +118,7 @@ function ClientAgenda() {
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-      <h2 className="mb-1 text-xl font-bold text-white">Agenda</h2>
+      <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Agenda</h2>
       <p className="mb-4 text-sm text-neutral-400">Reservá tu turno o revisá tus citas.</p>
 
       <div className="mb-6 flex gap-6 border-b border-neutral-800">

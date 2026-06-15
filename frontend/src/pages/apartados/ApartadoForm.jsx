@@ -78,7 +78,7 @@ function ApartadoForm() {
 
   return (
     <div className="max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-      <h2 className="mb-4 text-xl font-bold text-white">Nuevo apartado</h2>
+      <h2 className="mb-4 font-display text-2xl tracking-wide text-gold-400">Nuevo apartado</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -91,7 +91,7 @@ function ApartadoForm() {
             required
             value={form.cliente_id}
             onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           >
             <option value="">Seleccione un cliente</option>
             {clients.map((client) => (
@@ -112,7 +112,7 @@ function ApartadoForm() {
             required
             value={form.producto_id}
             onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           >
             <option value="">Seleccione un producto</option>
             {products.map((product) => (
@@ -136,7 +136,7 @@ function ApartadoForm() {
             required
             value={form.monto_total}
             onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
         </div>
 
@@ -149,7 +149,7 @@ function ApartadoForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-lg bg-orange-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded-lg bg-gold-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? 'Guardando...' : 'Registrar apartado'}
         </button>

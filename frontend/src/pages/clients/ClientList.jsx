@@ -22,6 +22,7 @@ function ClientList() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadClients();
   }, []);
 
@@ -44,10 +45,10 @@ function ClientList() {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-bold text-white">Clientes</h2>
+        <h2 className="font-display text-2xl tracking-wide text-gold-400">Clientes</h2>
         <Link
           to="/clientes/nuevo"
-          className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500"
+          className="rounded-lg bg-gold-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500"
         >
           Registrar cliente
         </Link>
@@ -59,11 +60,11 @@ function ClientList() {
           placeholder="Buscar por nombre, teléfono o correo"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          className="w-full max-w-sm rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+          className="w-full max-w-sm rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
         />
         <button
           type="submit"
-          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-300 transition hover:border-orange-500/50 hover:text-orange-400"
+          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-300 transition hover:border-gold-500/50 hover:text-gold-400"
         >
           Buscar
         </button>
@@ -100,13 +101,13 @@ function ClientList() {
                     <div className="flex justify-end gap-3">
                       <Link
                         to={`/clientes/${client.id}`}
-                        className="text-orange-500 hover:text-orange-400"
+                        className="text-gold-500 hover:text-gold-400"
                       >
                         Ver
                       </Link>
                       <Link
                         to={`/clientes/${client.id}/editar`}
-                        className="text-orange-500 hover:text-orange-400"
+                        className="text-gold-500 hover:text-gold-400"
                       >
                         Editar
                       </Link>

@@ -103,7 +103,7 @@ function WeeklySchedule() {
                     type="checkbox"
                     checked={day.activo}
                     onChange={(event) => updateDay(day.dia_semana, { activo: event.target.checked })}
-                    className="h-4 w-4 rounded border-neutral-700 bg-neutral-800 text-orange-500 accent-orange-500 focus:ring-orange-500/30"
+                    className="h-4 w-4 rounded border-neutral-700 bg-neutral-800 text-gold-500 accent-gold-500 focus:ring-gold-500/30"
                   />
                 </td>
                 <td className="py-2 pr-4">
@@ -112,7 +112,7 @@ function WeeklySchedule() {
                     value={day.hora_inicio}
                     disabled={!day.activo}
                     onChange={(event) => updateDay(day.dia_semana, { hora_inicio: event.target.value })}
-                    className="rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 disabled:opacity-40"
+                    className="rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30 disabled:opacity-40"
                   />
                 </td>
                 <td className="py-2 pr-4">
@@ -121,7 +121,7 @@ function WeeklySchedule() {
                     value={day.hora_fin}
                     disabled={!day.activo}
                     onChange={(event) => updateDay(day.dia_semana, { hora_fin: event.target.value })}
-                    className="rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 disabled:opacity-40"
+                    className="rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30 disabled:opacity-40"
                   />
                 </td>
               </tr>
@@ -145,7 +145,7 @@ function WeeklySchedule() {
         type="button"
         onClick={handleSave}
         disabled={saving}
-        className="rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-lg bg-gold-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {saving ? 'Guardando...' : 'Guardar horario'}
       </button>
@@ -236,7 +236,7 @@ function Exceptions() {
             min={todayISO()}
             value={form.fecha}
             onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
         </div>
         <div>
@@ -249,7 +249,7 @@ function Exceptions() {
             type="time"
             value={form.hora_inicio}
             onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
         </div>
         <div>
@@ -262,7 +262,7 @@ function Exceptions() {
             type="time"
             value={form.hora_fin}
             onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
         </div>
         <div>
@@ -274,7 +274,7 @@ function Exceptions() {
             name="tipo"
             value={form.tipo}
             onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           >
             <option value="bloqueo">Bloqueo</option>
             <option value="extra">Horario extra</option>
@@ -291,7 +291,7 @@ function Exceptions() {
             maxLength={255}
             value={form.motivo}
             onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
             placeholder="Vacaciones, feriado..."
           />
         </div>
@@ -299,7 +299,7 @@ function Exceptions() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg bg-gold-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? 'Agregando...' : 'Agregar'}
           </button>
@@ -353,7 +353,7 @@ function Availability() {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 text-xl font-bold text-white">Horario semanal</h2>
+        <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Horario semanal</h2>
         <p className="mb-4 text-sm text-neutral-400">
           Definí los días y horas en que el local atiende.
         </p>
@@ -361,7 +361,7 @@ function Availability() {
       </div>
 
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 text-xl font-bold text-white">Excepciones</h2>
+        <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Excepciones</h2>
         <p className="mb-4 text-sm text-neutral-400">
           Agregá bloqueos (vacaciones, feriados) u horarios extra puntuales.
         </p>

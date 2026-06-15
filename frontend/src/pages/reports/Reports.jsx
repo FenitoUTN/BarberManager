@@ -29,6 +29,7 @@ function Reports() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -52,7 +53,7 @@ function Reports() {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 text-xl font-bold text-white">Resumen de citas por día</h2>
+        <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Resumen de citas por día</h2>
         <p className="mb-4 text-sm text-neutral-400">
           Cantidad de citas registradas por día y su estado.
         </p>
@@ -67,7 +68,7 @@ function Reports() {
               type="date"
               value={desde}
               onChange={(event) => setDesde(event.target.value)}
-              className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+              className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
             />
           </div>
           <div>
@@ -79,12 +80,12 @@ function Reports() {
               type="date"
               value={hasta}
               onChange={(event) => setHasta(event.target.value)}
-              className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+              className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
             />
           </div>
           <button
             type="submit"
-            className="rounded-lg border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-300 transition hover:border-orange-500/50 hover:text-orange-400"
+            className="rounded-lg border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-300 transition hover:border-gold-500/50 hover:text-gold-400"
           >
             Filtrar
           </button>
@@ -119,7 +120,7 @@ function Reports() {
                     <td className="py-2 pr-4 font-medium text-neutral-100">
                       {formatDate(row.fecha)}
                     </td>
-                    <td className="py-2 pr-4 font-semibold text-orange-500">{row.total}</td>
+                    <td className="py-2 pr-4 font-semibold text-gold-500">{row.total}</td>
                     <td className="py-2 pr-4 text-neutral-400">{row.pendientes}</td>
                     <td className="py-2 pr-4 text-neutral-400">{row.confirmadas}</td>
                     <td className="py-2 pr-4 text-neutral-400">{row.completadas}</td>
@@ -130,7 +131,7 @@ function Reports() {
               <tfoot>
                 <tr className="border-t border-neutral-800 font-semibold text-neutral-100">
                   <td className="py-2 pr-4">Total</td>
-                  <td className="py-2 pr-4 text-orange-500">{totales.total}</td>
+                  <td className="py-2 pr-4 text-gold-500">{totales.total}</td>
                   <td className="py-2 pr-4 text-neutral-300">{totales.pendientes}</td>
                   <td className="py-2 pr-4 text-neutral-300">{totales.confirmadas}</td>
                   <td className="py-2 pr-4 text-neutral-300">{totales.completadas}</td>
@@ -143,7 +144,7 @@ function Reports() {
       </div>
 
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 text-xl font-bold text-white">Apartados activos</h2>
+        <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Apartados activos</h2>
         <p className="mb-4 text-sm text-neutral-400">
           Productos apartados con saldo pendiente de pago.
         </p>
@@ -174,13 +175,13 @@ function Reports() {
                     <td className="py-2 pr-4 text-neutral-400">
                       {formatPrice(apartado.monto_total)}
                     </td>
-                    <td className="py-2 pr-4 font-semibold text-orange-500">
+                    <td className="py-2 pr-4 font-semibold text-gold-500">
                       {formatPrice(apartado.saldo_pendiente)}
                     </td>
                     <td className="py-2 pr-4 text-right">
                       <Link
                         to={`/apartados/${apartado.id}`}
-                        className="text-orange-500 hover:text-orange-400"
+                        className="text-gold-500 hover:text-gold-400"
                       >
                         Ver
                       </Link>

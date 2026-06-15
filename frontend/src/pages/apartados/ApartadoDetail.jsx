@@ -11,7 +11,7 @@ const ESTADO_LABELS = {
 };
 
 const ESTADO_STYLES = {
-  activo: 'border-orange-500/30 bg-orange-500/10 text-orange-400',
+  activo: 'border-gold-500/30 bg-gold-500/10 text-gold-400',
   pagado: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
   cancelado: 'border-red-500/30 bg-red-500/10 text-red-400',
 };
@@ -56,6 +56,7 @@ function ApartadoDetail() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadApartado();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -99,10 +100,10 @@ function ApartadoDetail() {
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <Link to="/apartados" className="text-sm text-orange-500 hover:text-orange-400">
+            <Link to="/apartados" className="text-sm text-gold-500 hover:text-gold-400">
               ← Volver a apartados
             </Link>
-            <h2 className="mt-1 text-xl font-bold text-white">{apartado.producto_nombre}</h2>
+            <h2 className="mt-1 font-display text-2xl tracking-wide text-gold-400">{apartado.producto_nombre}</h2>
           </div>
           <ApartadoBadge estado={apartado.estado} />
         </div>
@@ -122,7 +123,7 @@ function ApartadoDetail() {
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-neutral-500">Saldo pendiente</dt>
-            <dd className="text-lg font-bold text-orange-500">
+            <dd className="text-lg font-bold text-gold-500">
               {formatPrice(apartado.saldo_pendiente)}
             </dd>
           </div>
@@ -136,7 +137,7 @@ function ApartadoDetail() {
       </div>
 
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h3 className="mb-4 text-lg font-bold text-white">Historial de abonos</h3>
+        <h3 className="mb-4 font-display text-xl tracking-wide text-gold-400">Historial de abonos</h3>
 
         {abonos.length === 0 ? (
           <p className="text-sm text-neutral-500">Aún no se han registrado abonos.</p>
@@ -179,13 +180,13 @@ function ApartadoDetail() {
                 required
                 value={monto}
                 onChange={(event) => setMonto(event.target.value)}
-                className="w-48 rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+                className="w-48 rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
               />
             </div>
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-gold-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? 'Guardando...' : 'Registrar abono'}
             </button>

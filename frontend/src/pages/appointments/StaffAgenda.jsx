@@ -11,7 +11,7 @@ function TabButton({ active, onClick, children }) {
       onClick={onClick}
       className={`border-b-2 px-1 pb-3 text-sm font-medium transition ${
         active
-          ? 'border-orange-500 text-orange-400'
+          ? 'border-gold-500 text-gold-400'
           : 'border-transparent text-neutral-500 hover:text-neutral-300'
       }`}
     >
@@ -22,7 +22,7 @@ function TabButton({ active, onClick, children }) {
 
 function ActionButton({ onClick, disabled, tone, children }) {
   const tones = {
-    orange: 'border-orange-500/40 text-orange-400 hover:bg-orange-500/10',
+    orange: 'border-gold-500/40 text-gold-400 hover:bg-gold-500/10',
     emerald: 'border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10',
     red: 'border-red-500/40 text-red-400 hover:bg-red-500/10',
   };
@@ -88,7 +88,7 @@ function TodayAgenda() {
           type="date"
           value={fecha}
           onChange={(event) => setFecha(event.target.value)}
-          className="w-full max-w-xs rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+          className="w-full max-w-xs rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
         />
       </div>
 
@@ -119,7 +119,7 @@ function TodayAgenda() {
                 {cita.notas && <p className="mt-1 text-xs text-neutral-500">{cita.notas}</p>}
               </div>
               <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-orange-500">
+                <p className="text-sm font-semibold text-gold-500">
                   {formatPrice(cita.servicio_precio)}
                 </p>
                 <EstadoBadge estado={cita.estado} />
@@ -212,7 +212,7 @@ function History() {
             type="date"
             value={filters.desde}
             onChange={handleChange}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
         </div>
         <div>
@@ -225,7 +225,7 @@ function History() {
             type="date"
             value={filters.hasta}
             onChange={handleChange}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
         </div>
         <div>
@@ -237,7 +237,7 @@ function History() {
             name="estado"
             value={filters.estado}
             onChange={handleChange}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           >
             <option value="">Todos</option>
             {Object.entries(ESTADO_LABELS).map(([value, label]) => (
@@ -250,7 +250,7 @@ function History() {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500 disabled:opacity-50"
+          className="rounded-lg bg-gold-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:opacity-50"
         >
           {loading ? 'Buscando...' : 'Buscar'}
         </button>
@@ -287,7 +287,7 @@ function History() {
                     </td>
                     <td className="py-2 pr-4 text-neutral-100">{cita.cliente_nombre}</td>
                     <td className="py-2 pr-4 text-neutral-400">{cita.servicio_nombre}</td>
-                    <td className="py-2 pr-4 text-orange-500">{formatPrice(cita.servicio_precio)}</td>
+                    <td className="py-2 pr-4 text-gold-500">{formatPrice(cita.servicio_precio)}</td>
                     <td className="py-2 pr-4">
                       <EstadoBadge estado={cita.estado} />
                     </td>
@@ -307,7 +307,7 @@ function StaffAgenda() {
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-      <h2 className="mb-1 text-xl font-bold text-white">Agenda</h2>
+      <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Agenda</h2>
       <p className="mb-4 text-sm text-neutral-400">
         Gestioná las citas del día, el historial y nuevas reservas.
       </p>

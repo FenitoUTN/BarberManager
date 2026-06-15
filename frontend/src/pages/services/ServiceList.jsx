@@ -29,7 +29,7 @@ function ServiceList() {
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-      <h2 className="mb-1 text-xl font-bold text-white">Servicios</h2>
+      <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Servicios</h2>
       <p className="mb-4 text-sm text-neutral-400">Catálogo de cortes y servicios del local.</p>
 
       {error && (
@@ -47,9 +47,9 @@ function ServiceList() {
           {services.map((service) => (
             <div
               key={service.id}
-              className="flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-950 p-5 transition hover:border-orange-500/40"
+              className="flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-950 p-5 transition hover:border-gold-500/40"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-500/10 text-gold-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -73,7 +73,7 @@ function ServiceList() {
                   {service.duracion_minutos} minutos
                 </p>
               </div>
-              <p className="text-lg font-bold text-orange-500">{formatPrice(service.precio)}</p>
+              <p className="text-lg font-bold text-gold-500">{formatPrice(service.precio)}</p>
             </div>
           ))}
         </div>

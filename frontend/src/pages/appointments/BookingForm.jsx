@@ -116,7 +116,7 @@ function BookingForm({ showClientSelect = false, onBooked, onViewAppointments })
               id="cliente"
               value={clienteId}
               onChange={(event) => setClienteId(event.target.value)}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
             >
               {clients.map((client) => (
                 <option key={client.id} value={client.id}>
@@ -135,7 +135,7 @@ function BookingForm({ showClientSelect = false, onBooked, onViewAppointments })
             id="servicio"
             value={servicioId}
             onChange={(event) => setServicioId(event.target.value)}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           >
             {services.map((service) => (
               <option key={service.id} value={service.id}>
@@ -155,7 +155,7 @@ function BookingForm({ showClientSelect = false, onBooked, onViewAppointments })
             min={todayISO()}
             value={fecha}
             onChange={(event) => setFecha(event.target.value)}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
         </div>
       </div>
@@ -175,8 +175,8 @@ function BookingForm({ showClientSelect = false, onBooked, onViewAppointments })
                 onClick={() => setHoraInicio(slot)}
                 className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
                   horaInicio === slot
-                    ? 'border-orange-500 bg-orange-500/10 text-orange-400'
-                    : 'border-neutral-700 text-neutral-300 hover:border-orange-500/50 hover:text-orange-400'
+                    ? 'border-gold-500 bg-gold-500/10 text-gold-400'
+                    : 'border-neutral-700 text-neutral-300 hover:border-gold-500/50 hover:text-gold-400'
                 }`}
               >
                 {formatTime(slot)}
@@ -196,7 +196,7 @@ function BookingForm({ showClientSelect = false, onBooked, onViewAppointments })
           maxLength={255}
           value={notas}
           onChange={(event) => setNotas(event.target.value)}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+          className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           placeholder="Indicaciones para el barbero"
         />
       </div>
@@ -225,7 +225,7 @@ function BookingForm({ showClientSelect = false, onBooked, onViewAppointments })
       <button
         type="submit"
         disabled={submitting || !horaInicio}
-        className="w-full rounded-lg bg-orange-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-6"
+        className="w-full rounded-lg bg-gold-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-6"
       >
         {submitting ? 'Reservando...' : 'Reservar turno'}
       </button>

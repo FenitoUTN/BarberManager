@@ -11,7 +11,7 @@ const ESTADO_LABELS = {
 };
 
 const ESTADO_STYLES = {
-  activo: 'border-orange-500/30 bg-orange-500/10 text-orange-400',
+  activo: 'border-gold-500/30 bg-gold-500/10 text-gold-400',
   pagado: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
   cancelado: 'border-red-500/30 bg-red-500/10 text-red-400',
 };
@@ -50,6 +50,7 @@ function ApartadoList() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadApartados();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [estado]);
@@ -57,11 +58,11 @@ function ApartadoList() {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-bold text-white">Apartados</h2>
+        <h2 className="font-display text-2xl tracking-wide text-gold-400">Apartados</h2>
         {isStaff && (
           <Link
             to="/apartados/nuevo"
-            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500"
+            className="rounded-lg bg-gold-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500"
           >
             Nuevo apartado
           </Link>
@@ -81,7 +82,7 @@ function ApartadoList() {
           id="estado"
           value={estado}
           onChange={(event) => setEstado(event.target.value)}
-          className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+          className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
         >
           <option value="">Todos</option>
           <option value="activo">Activo</option>
@@ -126,7 +127,7 @@ function ApartadoList() {
                   <td className="py-2 pr-4 text-neutral-400">
                     {formatPrice(apartado.monto_total)}
                   </td>
-                  <td className="py-2 pr-4 font-semibold text-orange-500">
+                  <td className="py-2 pr-4 font-semibold text-gold-500">
                     {formatPrice(apartado.saldo_pendiente)}
                   </td>
                   <td className="py-2 pr-4">
@@ -136,7 +137,7 @@ function ApartadoList() {
                     {formatDate(apartado.created_at.slice(0, 10))}
                   </td>
                   <td className="py-2 pr-4 text-right">
-                    <Link to={`/apartados/${apartado.id}`} className="text-orange-500 hover:text-orange-400">
+                    <Link to={`/apartados/${apartado.id}`} className="text-gold-500 hover:text-gold-400">
                       Ver
                     </Link>
                   </td>

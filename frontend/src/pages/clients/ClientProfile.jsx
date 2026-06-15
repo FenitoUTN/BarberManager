@@ -32,9 +32,9 @@ function ClientProfile() {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">Perfil del cliente</h2>
+        <h2 className="font-display text-2xl tracking-wide text-gold-400">Perfil del cliente</h2>
         {canManage && (
-          <Link to="/clientes" className="text-sm text-orange-500 hover:text-orange-400">
+          <Link to="/clientes" className="text-sm text-gold-500 hover:text-gold-400">
             ← Volver a clientes
           </Link>
         )}
@@ -71,7 +71,7 @@ function ClientProfile() {
           {canManage && (
             <Link
               to={`/clientes/${client.id}/editar`}
-              className="mt-2 inline-block rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500"
+              className="mt-2 inline-block rounded-lg bg-gold-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500"
             >
               Editar información
             </Link>

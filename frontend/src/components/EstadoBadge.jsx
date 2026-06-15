@@ -8,7 +8,7 @@ export const ESTADO_LABELS = {
 
 const ESTADO_STYLES = {
   pendiente: 'border-yellow-500/30 bg-yellow-500/10 text-yellow-400',
-  confirmada: 'border-orange-500/30 bg-orange-500/10 text-orange-400',
+  confirmada: 'border-gold-500/30 bg-gold-500/10 text-gold-400',
   cancelada: 'border-red-500/30 bg-red-500/10 text-red-400',
   completada: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
 };

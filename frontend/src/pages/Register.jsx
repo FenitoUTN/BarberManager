@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { BarberPoleIcon, FlameDivider, FlameIcon } from '../components/BarberIcons';
 
 function Register() {
   const { register } = useAuth();
@@ -34,34 +35,23 @@ function Register() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-neutral-950 px-4">
-      <div className="pointer-events-none absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-orange-600/20 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-orange-500/10 blur-3xl" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4">
+      <div className="pointer-events-none absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-blood-600/20 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-gold-500/10 blur-3xl" />
+      <FlameIcon className="pointer-events-none absolute -left-10 bottom-0 h-64 w-64 text-blood-900/30" />
+      <FlameIcon className="pointer-events-none absolute -right-12 top-0 h-72 w-72 rotate-12 text-gold-900/20" />
 
-      <div className="relative w-full max-w-sm rounded-2xl border border-neutral-800 bg-neutral-900 p-8 shadow-2xl shadow-black/60">
+      <div className="relative w-full max-w-sm rounded-2xl border border-gold-900/40 bg-neutral-950 p-8 shadow-2xl shadow-black/60">
+        <div className="h-1 -mx-8 -mt-8 mb-6 rounded-t-2xl barber-stripes" />
         <div className="mb-6 flex flex-col items-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-orange-700 shadow-lg shadow-orange-500/30">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-7 w-7 text-white"
-            >
-              <circle cx="6" cy="6" r="3" />
-              <circle cx="6" cy="18" r="3" />
-              <line x1="20" y1="4" x2="8.12" y2="15.88" />
-              <line x1="14.47" y1="14.48" x2="20" y2="20" />
-              <line x1="8.12" y1="8.12" x2="12" y2="12" />
-            </svg>
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-gold-600 bg-black shadow-lg shadow-black/60">
+            <BarberPoleIcon className="h-10 w-10 text-blood-500" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">BarberManager</h1>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-orange-500">
+          <h1 className="font-gothic text-3xl text-gold-400 text-glow-gold">BarberManager</h1>
+          <p className="mt-2 text-xs font-semibold uppercase tracking-widest text-blood-400">
             Crea tu cuenta de cliente
           </p>
+          <FlameDivider className="mt-4 w-full" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -76,7 +66,7 @@ function Register() {
               required
               value={form.nombre}
               onChange={handleChange}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
             />
           </div>
 
@@ -91,7 +81,7 @@ function Register() {
               required
               value={form.telefono}
               onChange={handleChange}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
             />
           </div>
 
@@ -106,7 +96,7 @@ function Register() {
               required
               value={form.email}
               onChange={handleChange}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
             />
           </div>
 
@@ -122,7 +112,7 @@ function Register() {
               minLength={6}
               value={form.password}
               onChange={handleChange}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
             />
           </div>
 
@@ -135,7 +125,7 @@ function Register() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-orange-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg bg-gradient-to-r from-blood-700 to-gold-700 py-2.5 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-black/50 transition hover:from-blood-600 hover:to-gold-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? 'Creando cuenta...' : 'Registrarme'}
           </button>
@@ -143,7 +133,7 @@ function Register() {
 
         <p className="mt-6 text-center text-sm text-neutral-400">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="font-medium text-orange-500 hover:text-orange-400">
+          <Link to="/login" className="font-medium text-gold-500 hover:text-gold-400">
             Inicia sesión
           </Link>
         </p>

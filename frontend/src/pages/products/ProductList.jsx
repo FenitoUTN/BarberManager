@@ -27,6 +27,7 @@ function ProductList() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showInactive]);
@@ -49,11 +50,11 @@ function ProductList() {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-bold text-white">Productos</h2>
+        <h2 className="font-display text-2xl tracking-wide text-gold-400">Productos</h2>
         {isStaff && (
           <Link
             to="/productos/nuevo"
-            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500"
+            className="rounded-lg bg-gold-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500"
           >
             Nuevo producto
           </Link>
@@ -67,7 +68,7 @@ function ProductList() {
             type="checkbox"
             checked={showInactive}
             onChange={(event) => setShowInactive(event.target.checked)}
-            className="h-4 w-4 rounded border-neutral-700 bg-neutral-800 text-orange-500 focus:ring-orange-500/30"
+            className="h-4 w-4 rounded border-neutral-700 bg-neutral-800 text-gold-500 focus:ring-gold-500/30"
           />
           Mostrar productos inactivos
         </label>
@@ -100,7 +101,7 @@ function ProductList() {
                 <tr key={product.id} className="border-b border-neutral-800/60">
                   <td className="py-2 pr-4 font-medium text-neutral-100">{product.nombre}</td>
                   <td className="py-2 pr-4 text-neutral-400">{product.descripcion || '—'}</td>
-                  <td className="py-2 pr-4 font-semibold text-orange-500">
+                  <td className="py-2 pr-4 font-semibold text-gold-500">
                     {formatPrice(product.precio)}
                   </td>
                   {isStaff && (
@@ -121,7 +122,7 @@ function ProductList() {
                       <div className="flex justify-end gap-3">
                         <Link
                           to={`/productos/${product.id}/editar`}
-                          className="text-orange-500 hover:text-orange-400"
+                          className="text-gold-500 hover:text-gold-400"
                         >
                           Editar
                         </Link>

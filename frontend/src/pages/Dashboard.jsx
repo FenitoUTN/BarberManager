@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FlameIcon } from '../components/BarberIcons';
 
 const ROLE_LABELS = {
   admin: 'Administrador',
@@ -129,12 +130,13 @@ function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-600/10 blur-3xl" />
-        <p className="text-xs font-semibold uppercase tracking-widest text-orange-500">
+      <div className="relative overflow-hidden rounded-2xl border border-gold-900/40 bg-neutral-950 p-6 shadow-lg shadow-black/40">
+        <div className="h-1 -mx-6 -mt-6 mb-5 barber-stripes" />
+        <FlameIcon className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rotate-12 text-blood-900/30" />
+        <p className="text-xs font-semibold uppercase tracking-widest text-blood-400">
           {ROLE_LABELS[user?.rol] || user?.rol}
         </p>
-        <h2 className="mt-1 text-2xl font-bold text-white">¡Bienvenido/a, {user?.nombre}!</h2>
+        <h2 className="mt-1 font-display text-3xl text-gold-400 text-glow-gold">¡Bienvenido/a, {user?.nombre}!</h2>
         <p className="mt-2 max-w-2xl text-sm text-neutral-400">
           Este es el panel principal de BarberManager. Desde aquí vas a poder administrar la
           agenda, los servicios, los productos y los reportes del local según tu rol.
@@ -143,7 +145,7 @@ function Dashboard() {
         {(user?.rol === 'admin' || user?.rol === 'barbero') && (
           <Link
             to="/clientes"
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500"
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-700 to-gold-700 px-4 py-2.5 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-black/50 transition hover:from-blood-600 hover:to-gold-600"
           >
             <ModuleIcon name="users" className="h-4 w-4" />
             Ir a gestión de clientes
@@ -153,7 +155,7 @@ function Dashboard() {
         {user?.rol === 'cliente' && (
           <Link
             to={`/clientes/${user.id}`}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/30 transition hover:bg-orange-500"
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-700 to-gold-700 px-4 py-2.5 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-black/50 transition hover:from-blood-600 hover:to-gold-600"
           >
             <ModuleIcon name="user" className="h-4 w-4" />
             Ver mi perfil
@@ -162,7 +164,7 @@ function Dashboard() {
       </div>
 
       <div>
-        <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-neutral-500">
+        <h3 className="mb-4 font-display text-lg tracking-wide text-gold-500/90">
           Accesos rápidos
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -170,13 +172,13 @@ function Dashboard() {
             <Link
               key={link.title}
               to={link.to}
-              className="group relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 p-5 transition hover:border-orange-500/40"
+              className="group relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 p-5 transition hover:border-gold-500/40"
             >
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-500/10 text-gold-400">
                   <ModuleIcon name={link.icon} className="h-5 w-5" />
                 </div>
-                <span className="text-orange-500 transition group-hover:translate-x-1">→</span>
+                <span className="text-gold-500 transition group-hover:translate-x-1">→</span>
               </div>
               <h4 className="mt-4 text-sm font-semibold text-neutral-100">{link.title}</h4>
               <p className="mt-1 text-sm text-neutral-500">{link.description}</p>
@@ -186,17 +188,17 @@ function Dashboard() {
       </div>
 
       <div>
-        <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-neutral-500">
+        <h3 className="mb-4 font-display text-lg tracking-wide text-gold-500/90">
           Próximos módulos
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {UPCOMING_MODULES.map((module) => (
             <div
               key={module.title}
-              className="group relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 p-5 transition hover:border-orange-500/40"
+              className="group relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 p-5 transition hover:border-gold-500/40"
             >
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-500/10 text-gold-400">
                   <ModuleIcon name={module.icon} className="h-5 w-5" />
                 </div>
                 <span className="rounded-full border border-neutral-700 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
