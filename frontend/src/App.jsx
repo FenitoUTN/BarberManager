@@ -13,6 +13,10 @@ import ServiceList from './pages/services/ServiceList';
 import Availability from './pages/availability/Availability';
 import ProductList from './pages/products/ProductList';
 import ProductForm from './pages/products/ProductForm';
+import ApartadoList from './pages/apartados/ApartadoList';
+import ApartadoForm from './pages/apartados/ApartadoForm';
+import ApartadoDetail from './pages/apartados/ApartadoDetail';
+import Reports from './pages/reports/Reports';
 
 function App() {
   return (
@@ -27,6 +31,8 @@ function App() {
             <Route path="/agenda" element={<Agenda />} />
             <Route path="/servicios" element={<ServiceList />} />
             <Route path="/productos" element={<ProductList />} />
+            <Route path="/apartados" element={<ApartadoList />} />
+            <Route path="/apartados/:id" element={<ApartadoDetail />} />
 
             <Route path="/clientes/:id" element={<ClientProfile />} />
 
@@ -37,6 +43,8 @@ function App() {
               <Route path="/disponibilidad" element={<Availability />} />
               <Route path="/productos/nuevo" element={<ProductForm />} />
               <Route path="/productos/:id/editar" element={<ProductForm />} />
+              <Route path="/apartados/nuevo" element={<ApartadoForm />} />
+              <Route path="/reportes" element={<Reports />} />
             </Route>
           </Route>
         </Route>

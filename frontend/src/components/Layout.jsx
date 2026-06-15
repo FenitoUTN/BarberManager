@@ -12,8 +12,10 @@ const NAV_LINKS = [
   { to: '/agenda', label: 'Agenda', icon: 'calendar', roles: ['admin', 'barbero', 'cliente'] },
   { to: '/servicios', label: 'Servicios', icon: 'scissors', roles: ['admin', 'barbero', 'cliente'] },
   { to: '/productos', label: 'Productos', icon: 'box', roles: ['admin', 'barbero', 'cliente'] },
+  { to: '/apartados', label: 'Apartados', icon: 'tag', roles: ['admin', 'barbero', 'cliente'] },
   { to: '/clientes', label: 'Clientes', icon: 'users', roles: ['admin', 'barbero'] },
   { to: '/disponibilidad', label: 'Disponibilidad', icon: 'clock', roles: ['admin', 'barbero'] },
+  { to: '/reportes', label: 'Reportes', icon: 'chart', roles: ['admin', 'barbero'] },
 ];
 
 function NavIcon({ name, className }) {
@@ -93,6 +95,43 @@ function NavIcon({ name, className }) {
         <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
         <path d="M3.27 6.96 12 12.01l8.73-5.05" />
         <line x1="12" y1="22.08" x2="12" y2="12" />
+      </svg>
+    );
+  }
+
+  if (name === 'chart') {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        <line x1="12" y1="20" x2="12" y2="10" />
+        <line x1="18" y1="20" x2="18" y2="4" />
+        <line x1="6" y1="20" x2="6" y2="16" />
+      </svg>
+    );
+  }
+
+  if (name === 'tag') {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+        <circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" stroke="none" />
       </svg>
     );
   }
