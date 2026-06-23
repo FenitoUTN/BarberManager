@@ -78,7 +78,7 @@ function ProductForm() {
 
   return (
     <div className="max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-      <h2 className="mb-4 font-display text-2xl tracking-wide text-gold-400">
+      <h2 className="mb-4 font-serif text-2xl tracking-wide text-gold-400">
         {isEditing ? 'Editar producto' : 'Nuevo producto'}
       </h2>
 

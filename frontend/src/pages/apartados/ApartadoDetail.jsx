@@ -103,7 +103,7 @@ function ApartadoDetail() {
             <Link to="/apartados" className="text-sm text-gold-500 hover:text-gold-400">
               ← Volver a apartados
             </Link>
-            <h2 className="mt-1 font-display text-2xl tracking-wide text-gold-400">{apartado.producto_nombre}</h2>
+            <h2 className="mt-1 font-serif text-2xl tracking-wide text-gold-400">{apartado.producto_nombre}</h2>
           </div>
           <ApartadoBadge estado={apartado.estado} />
         </div>
@@ -137,7 +137,7 @@ function ApartadoDetail() {
       </div>
 
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h3 className="mb-4 font-display text-xl tracking-wide text-gold-400">Historial de abonos</h3>
+        <h3 className="mb-4 font-serif text-xl tracking-wide text-gold-400">Historial de abonos</h3>
 
         {abonos.length === 0 ? (
           <p className="text-sm text-neutral-500">Aún no se han registrado abonos.</p>

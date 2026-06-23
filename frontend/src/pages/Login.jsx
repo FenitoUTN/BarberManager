@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BarberPoleIcon, FlameDivider, FlameIcon } from '../components/BarberIcons';
+import { ScissorsIcon, GoldDivider } from '../components/BarberIcons';
 
 function Login() {
   const { login } = useAuth();
@@ -23,36 +23,30 @@ function Login() {
       const redirectTo = location.state?.from?.pathname || '/dashboard';
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'No fue posible iniciar sesión');
+      setError(err.response?.data?.message || 'No fue posible iniciar sesion');
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4">
-      <div className="pointer-events-none absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-blood-600/20 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-gold-500/10 blur-3xl" />
-      <FlameIcon className="pointer-events-none absolute -left-10 bottom-0 h-64 w-64 text-blood-900/30" />
-      <FlameIcon className="pointer-events-none absolute -right-12 top-0 h-72 w-72 rotate-12 text-gold-900/20" />
-
-      <div className="relative w-full max-w-sm rounded-2xl border border-gold-900/40 bg-neutral-950 p-8 shadow-2xl shadow-black/60">
-        <div className="h-1 -mx-8 -mt-8 mb-6 rounded-t-2xl barber-stripes" />
+    <div className="flex min-h-screen items-center justify-center bg-[#0c0c0c] px-4">
+      <div className="w-full max-w-sm rounded-xl border border-gold-800/30 bg-[#141414] p-8 shadow-2xl">
         <div className="mb-6 flex flex-col items-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-gold-600 bg-black shadow-lg shadow-black/60">
-            <BarberPoleIcon className="h-10 w-10 text-blood-500" />
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-gold-600/40 bg-gold-400/10">
+            <ScissorsIcon className="h-7 w-7 text-gold-400" />
           </div>
-          <h1 className="font-gothic text-3xl text-gold-400 text-glow-gold">BarberManager</h1>
-          <p className="mt-2 text-xs font-semibold uppercase tracking-widest text-blood-400">
-            Kenneth's Barber
+          <h1 className="font-serif text-2xl text-gold-400">BarberManager</h1>
+          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-500">
+            Kenneth&apos;s Barber
           </p>
-          <FlameDivider className="mt-4 w-full" />
+          <GoldDivider className="mt-5 w-full" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Correo electrónico
+              Correo electronico
             </label>
             <input
               id="email"
@@ -60,14 +54,14 @@ function Login() {
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
+              className="w-full rounded-lg border border-neutral-700/50 bg-[#1a1a1a] px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition focus:border-gold-500/60 focus:ring-1 focus:ring-gold-500/20"
               placeholder="tu@email.com"
             />
           </div>
 
           <div>
             <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Contraseña
+              Contrasena
             </label>
             <input
               id="password"
@@ -75,13 +69,13 @@ function Login() {
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
+              className="w-full rounded-lg border border-neutral-700/50 bg-[#1a1a1a] px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition focus:border-gold-500/60 focus:ring-1 focus:ring-gold-500/20"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+            <p className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm text-red-400">
               {error}
             </p>
           )}
@@ -89,16 +83,16 @@ function Login() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-gradient-to-r from-blood-700 to-gold-700 py-2.5 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-black/50 transition hover:from-blood-600 hover:to-gold-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg border border-gold-600/60 bg-gold-600/20 py-2.5 text-sm font-semibold uppercase tracking-wider text-gold-400 transition hover:bg-gold-600/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {submitting ? 'Ingresando...' : 'Iniciar sesión'}
+            {submitting ? 'Ingresando...' : 'Iniciar sesion'}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-neutral-400">
-          ¿No tienes cuenta?{' '}
-          <Link to="/register" className="font-medium text-gold-500 hover:text-gold-400">
-            Regístrate
+        <p className="mt-6 text-center text-sm text-neutral-500">
+          No tienes cuenta?{' '}
+          <Link to="/register" className="font-medium text-gold-400 hover:text-gold-300">
+            Registrate
           </Link>
         </p>
       </div>

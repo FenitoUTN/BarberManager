@@ -1,27 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  --color-gold-50: #fbf4e4;
-  --color-gold-100: #f5e6c2;
-  --color-gold-200: #ecd293;
-  --color-gold-300: #e2bb64;
-  --color-gold-400: #d8a83f;
-  --color-gold-500: #c9982e;
-  --color-gold-600: #a87a22;
-  --color-gold-700: #855e1b;
-  --color-gold-800: #614315;
-  --color-gold-900: #3f2c0e;
+  --color-gold-50: #faf6ed;
+  --color-gold-100: #f0e4c8;
+  --color-gold-200: #e2cc9a;
+  --color-gold-300: #d4b87a;
+  --color-gold-400: #c9a96e;
+  --color-gold-500: #b8954a;
+  --color-gold-600: #9a7a3b;
+  --color-gold-700: #7c612e;
+  --color-gold-800: #5e4922;
+  --color-gold-900: #3d2f16;
 
-  --color-blood-400: #e23b3b;
-  --color-blood-500: #c41e1e;
-  --color-blood-600: #a11414;
-  --color-blood-700: #7a0f0f;
-  --color-blood-800: #520a0a;
-  --color-blood-900: #2e0606;
-
-  --font-gothic: "UnifrakturMaguntia", "MedievalSharp", cursive;
-  --font-display: "MedievalSharp", "UnifrakturMaguntia", cursive;
-  --font-urban: "Oswald", "Segoe UI", sans-serif;
+  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-sans: "Inter", system-ui, "Segoe UI", sans-serif;
 }
 
 :root {
@@ -36,36 +28,16 @@ body,
 
 body {
   margin: 0;
-  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
-  background-color: #0a0a0a;
-  color: #f5f5f5;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(196, 30, 30, 0.12), transparent),
-    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(201, 152, 46, 0.08), transparent);
-  background-attachment: fixed;
+  font-family: var(--font-sans);
+  background-color: #0c0c0c;
+  color: #f0f0f0;
 }
 
 * {
-  scrollbar-color: #c9982e #141414;
+  scrollbar-color: #c9a96e #141414;
 }
 
-/* Classic barber pole diagonal stripes, used as decorative accent borders */
-.barber-stripes {
-  background-image: repeating-linear-gradient(
-    45deg,
-    #c41e1e 0px,
-    #c41e1e 10px,
-    #f5f5f5 10px,
-    #f5f5f5 20px,
-    #0a0a0a 20px,
-    #0a0a0a 30px
-  );
-}
-
-.text-glow-gold {
-  text-shadow: 0 0 18px rgba(201, 152, 46, 0.45);
-}
-
-.text-glow-blood {
-  text-shadow: 0 0 18px rgba(196, 30, 30, 0.45);
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9a96e, transparent);
 }

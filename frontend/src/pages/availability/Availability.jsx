@@ -353,7 +353,7 @@ function Availability() {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Horario semanal</h2>
+        <h2 className="mb-1 font-serif text-2xl tracking-wide text-gold-400">Horario semanal</h2>
         <p className="mb-4 text-sm text-neutral-400">
           Definí los días y horas en que el local atiende.
         </p>
@@ -361,7 +361,7 @@ function Availability() {
       </div>
 
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Excepciones</h2>
+        <h2 className="mb-1 font-serif text-2xl tracking-wide text-gold-400">Excepciones</h2>
         <p className="mb-4 text-sm text-neutral-400">
           Agregá bloqueos (vacaciones, feriados) u horarios extra puntuales.
         </p>

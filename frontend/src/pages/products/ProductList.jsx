@@ -50,7 +50,7 @@ function ProductList() {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-2xl tracking-wide text-gold-400">Productos</h2>
+        <h2 className="font-serif text-2xl tracking-wide text-gold-400">Productos</h2>
         {isStaff && (
           <Link
             to="/productos/nuevo"

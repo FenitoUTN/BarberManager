@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FlameIcon } from '../components/BarberIcons';
 
 const ROLE_LABELS = {
   admin: 'Administrador',
@@ -11,21 +10,21 @@ const ROLE_LABELS = {
 const QUICK_LINKS = [
   {
     title: 'Agenda',
-    description: 'Reservá y gestioná los turnos de cada barbero.',
+    description: 'Reserva y gestiona los turnos de cada barbero.',
     icon: 'calendar',
     to: '/agenda',
     roles: ['admin', 'barbero', 'cliente'],
   },
   {
     title: 'Servicios',
-    description: 'Consultá cortes, combos y precios del local.',
+    description: 'Consulta cortes, combos y precios del local.',
     icon: 'scissors',
     to: '/servicios',
     roles: ['admin', 'barbero', 'cliente'],
   },
   {
     title: 'Disponibilidad',
-    description: 'Definí el horario semanal y las excepciones.',
+    description: 'Define el horario semanal y las excepciones.',
     icon: 'clock',
     to: '/disponibilidad',
     roles: ['admin', 'barbero'],
@@ -35,17 +34,17 @@ const QUICK_LINKS = [
 const UPCOMING_MODULES = [
   {
     title: 'Productos',
-    description: 'Controlá el stock de productos de venta.',
+    description: 'Controla el stock de productos de venta.',
     icon: 'package',
   },
   {
     title: 'Apartados',
-    description: 'Reservá productos para tus clientes.',
+    description: 'Reserva productos para tus clientes.',
     icon: 'bookmark',
   },
   {
     title: 'Reportes',
-    description: 'Visualizá ingresos y desempeño del local.',
+    description: 'Visualiza ingresos y desempeno del local.',
     icon: 'chart',
   },
 ];
@@ -115,7 +114,7 @@ function ModuleIcon({ name, className }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -130,83 +129,86 @@ function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-2xl border border-gold-900/40 bg-neutral-950 p-6 shadow-lg shadow-black/40">
-        <div className="h-1 -mx-6 -mt-6 mb-5 barber-stripes" />
-        <FlameIcon className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rotate-12 text-blood-900/30" />
-        <p className="text-xs font-semibold uppercase tracking-widest text-blood-400">
+      {/* Hero welcome */}
+      <div className="rounded-xl border border-gold-800/30 bg-[#141414] p-6">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-gold-500">
           {ROLE_LABELS[user?.rol] || user?.rol}
         </p>
-        <h2 className="mt-1 font-display text-3xl text-gold-400 text-glow-gold">¡Bienvenido/a, {user?.nombre}!</h2>
-        <p className="mt-2 max-w-2xl text-sm text-neutral-400">
-          Este es el panel principal de BarberManager. Desde aquí vas a poder administrar la
-          agenda, los servicios, los productos y los reportes del local según tu rol.
+        <h2 className="mt-2 font-serif text-3xl text-gold-400">Bienvenido, {user?.nombre}</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-400">
+          Este es el panel principal de BarberManager. Desde aqui vas a poder administrar la
+          agenda, los servicios, los productos y los reportes del local segun tu rol.
         </p>
 
-        {(user?.rol === 'admin' || user?.rol === 'barbero') && (
-          <Link
-            to="/clientes"
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-700 to-gold-700 px-4 py-2.5 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-black/50 transition hover:from-blood-600 hover:to-gold-600"
-          >
-            <ModuleIcon name="users" className="h-4 w-4" />
-            Ir a gestión de clientes
-          </Link>
-        )}
+        <div className="mt-5">
+          {(user?.rol === 'admin' || user?.rol === 'barbero') && (
+            <Link
+              to="/clientes"
+              className="inline-flex items-center gap-2 rounded-lg border border-gold-600/60 bg-gold-600/20 px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-gold-400 transition hover:bg-gold-600/30"
+            >
+              <ModuleIcon name="users" className="h-4 w-4" />
+              Gestion de clientes
+            </Link>
+          )}
 
-        {user?.rol === 'cliente' && (
-          <Link
-            to={`/clientes/${user.id}`}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blood-700 to-gold-700 px-4 py-2.5 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-black/50 transition hover:from-blood-600 hover:to-gold-600"
-          >
-            <ModuleIcon name="user" className="h-4 w-4" />
-            Ver mi perfil
-          </Link>
-        )}
+          {user?.rol === 'cliente' && (
+            <Link
+              to={`/clientes/${user.id}`}
+              className="inline-flex items-center gap-2 rounded-lg border border-gold-600/60 bg-gold-600/20 px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-gold-400 transition hover:bg-gold-600/30"
+            >
+              <ModuleIcon name="user" className="h-4 w-4" />
+              Ver mi perfil
+            </Link>
+          )}
+        </div>
       </div>
 
+      {/* Quick links */}
       <div>
-        <h3 className="mb-4 font-display text-lg tracking-wide text-gold-500/90">
-          Accesos rápidos
+        <h3 className="mb-4 font-serif text-lg text-gold-400">
+          Accesos rapidos
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {QUICK_LINKS.filter((link) => link.roles.includes(user?.rol)).map((link) => (
             <Link
               key={link.title}
               to={link.to}
-              className="group relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 p-5 transition hover:border-gold-500/40"
+              className="group rounded-xl border border-gold-800/20 bg-[#141414] p-5 transition hover:border-gold-600/40"
             >
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-500/10 text-gold-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-gold-600/30 bg-gold-400/5 text-gold-400">
                   <ModuleIcon name={link.icon} className="h-5 w-5" />
                 </div>
-                <span className="text-gold-500 transition group-hover:translate-x-1">→</span>
+                <span className="text-gold-500/60 transition group-hover:translate-x-1 group-hover:text-gold-400">&#8594;</span>
               </div>
-              <h4 className="mt-4 text-sm font-semibold text-neutral-100">{link.title}</h4>
+              <h4 className="mt-4 text-sm font-semibold text-neutral-200">{link.title}</h4>
               <p className="mt-1 text-sm text-neutral-500">{link.description}</p>
             </Link>
           ))}
         </div>
       </div>
 
+      {/* Upcoming modules */}
       <div>
-        <h3 className="mb-4 font-display text-lg tracking-wide text-gold-500/90">
-          Próximos módulos
+        <h3 className="mb-4 font-serif text-lg text-gold-400">
+          Proximos modulos
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {UPCOMING_MODULES.map((module) => (
             <div
               key={module.title}
-              className="group relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 p-5 transition hover:border-gold-500/40"
+              className="rounded-xl border border-neutral-800/60 bg-[#141414] p-5"
             >
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-500/10 text-gold-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-neutral-700/40 bg-white/5 text-neutral-500">
                   <ModuleIcon name={module.icon} className="h-5 w-5" />
                 </div>
-                <span className="rounded-full border border-neutral-700 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
-                  Próximamente
+                <span className="rounded border border-neutral-700/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-neutral-600">
+                  Proximamente
                 </span>
               </div>
-              <h4 className="mt-4 text-sm font-semibold text-neutral-100">{module.title}</h4>
-              <p className="mt-1 text-sm text-neutral-500">{module.description}</p>
+              <h4 className="mt-4 text-sm font-semibold text-neutral-300">{module.title}</h4>
+              <p className="mt-1 text-sm text-neutral-600">{module.description}</p>
             </div>
           ))}
         </div>

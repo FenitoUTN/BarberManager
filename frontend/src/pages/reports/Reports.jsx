@@ -53,7 +53,7 @@ function Reports() {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Resumen de citas por día</h2>
+        <h2 className="mb-1 font-serif text-2xl tracking-wide text-gold-400">Resumen de citas por día</h2>
         <p className="mb-4 text-sm text-neutral-400">
           Cantidad de citas registradas por día y su estado.
         </p>
@@ -144,7 +144,7 @@ function Reports() {
       </div>
 
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 font-display text-2xl tracking-wide text-gold-400">Apartados activos</h2>
+        <h2 className="mb-1 font-serif text-2xl tracking-wide text-gold-400">Apartados activos</h2>
         <p className="mb-4 text-sm text-neutral-400">
           Productos apartados con saldo pendiente de pago.
         </p>

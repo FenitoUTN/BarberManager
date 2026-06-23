@@ -32,7 +32,7 @@ function ClientList() {
   }
 
   async function handleDelete(id) {
-    if (!window.confirm('¿Eliminar este cliente?')) return;
+    if (!window.confirm('Eliminar este cliente?')) return;
 
     try {
       await deleteClient(id);
@@ -43,12 +43,12 @@ function ClientList() {
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
+    <div className="rounded-xl border border-gold-800/20 bg-[#141414] p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-2xl tracking-wide text-gold-400">Clientes</h2>
+        <h2 className="font-serif text-2xl text-gold-400">Clientes</h2>
         <Link
           to="/clientes/nuevo"
-          className="rounded-lg bg-gold-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500"
+          className="rounded-lg border border-gold-600/60 bg-gold-600/20 px-4 py-2 text-sm font-semibold uppercase tracking-wider text-gold-400 transition hover:bg-gold-600/30"
         >
           Registrar cliente
         </Link>
@@ -57,21 +57,21 @@ function ClientList() {
       <form onSubmit={handleSearchSubmit} className="mb-4 flex gap-2">
         <input
           type="text"
-          placeholder="Buscar por nombre, teléfono o correo"
+          placeholder="Buscar por nombre, telefono o correo"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          className="w-full max-w-sm rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
+          className="w-full max-w-sm rounded-lg border border-neutral-700/50 bg-[#1a1a1a] px-3 py-2 text-sm text-white placeholder-neutral-600 outline-none transition focus:border-gold-500/60 focus:ring-1 focus:ring-gold-500/20"
         />
         <button
           type="submit"
-          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-300 transition hover:border-gold-500/50 hover:text-gold-400"
+          className="rounded-lg border border-neutral-700/50 px-4 py-2 text-sm font-medium text-neutral-400 transition hover:border-gold-600/40 hover:text-gold-400"
         >
           Buscar
         </button>
       </form>
 
       {error && (
-        <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+        <p className="mb-4 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm text-red-400">
           {error}
         </p>
       )}
@@ -84,38 +84,28 @@ function ClientList() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-neutral-800 text-neutral-500">
-                <th className="py-2 pr-4 font-medium">Nombre</th>
-                <th className="py-2 pr-4 font-medium">Teléfono</th>
-                <th className="py-2 pr-4 font-medium">Correo</th>
-                <th className="py-2 pr-4"></th>
+              <tr className="border-b border-gold-800/20 text-neutral-500">
+                <th className="py-2.5 pr-4 font-medium">Nombre</th>
+                <th className="py-2.5 pr-4 font-medium">Telefono</th>
+                <th className="py-2.5 pr-4 font-medium">Correo</th>
+                <th className="py-2.5 pr-4"></th>
               </tr>
             </thead>
             <tbody>
               {clients.map((client) => (
-                <tr key={client.id} className="border-b border-neutral-800/60">
-                  <td className="py-2 pr-4 font-medium text-neutral-100">{client.nombre}</td>
-                  <td className="py-2 pr-4 text-neutral-400">{client.telefono}</td>
-                  <td className="py-2 pr-4 text-neutral-400">{client.email || '—'}</td>
-                  <td className="py-2 pr-4 text-right">
+                <tr key={client.id} className="border-b border-neutral-800/40">
+                  <td className="py-2.5 pr-4 font-medium text-neutral-200">{client.nombre}</td>
+                  <td className="py-2.5 pr-4 text-neutral-400">{client.telefono}</td>
+                  <td className="py-2.5 pr-4 text-neutral-400">{client.email || '—'}</td>
+                  <td className="py-2.5 pr-4 text-right">
                     <div className="flex justify-end gap-3">
-                      <Link
-                        to={`/clientes/${client.id}`}
-                        className="text-gold-500 hover:text-gold-400"
-                      >
+                      <Link to={`/clientes/${client.id}`} className="text-gold-400 hover:text-gold-300">
                         Ver
                       </Link>
-                      <Link
-                        to={`/clientes/${client.id}/editar`}
-                        className="text-gold-500 hover:text-gold-400"
-                      >
+                      <Link to={`/clientes/${client.id}/editar`} className="text-gold-400 hover:text-gold-300">
                         Editar
                       </Link>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(client.id)}
-                        className="text-red-400 hover:text-red-300"
-                      >
+                      <button type="button" onClick={() => handleDelete(client.id)} className="text-red-400 hover:text-red-300">
                         Eliminar
                       </button>
                     </div>
