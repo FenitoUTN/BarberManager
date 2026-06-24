@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const morgan = require('morgan');
 require('dotenv').config();
@@ -14,8 +15,16 @@ app.use(morgan('dev'));
 
 app.use('/api', apiRoutes);
 
-app.use((req, res) => {
-  res.status(404).json({ message: 'Recurso no encontrado' });
+const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
+app.use(express.static(frontendDist));
+
+app.get('*', (req, res) => {
+  const indexPath = path.join(frontendDist, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      res.status(404).json({ message: 'Recurso no encontrado' });
+    }
+  });
 });
 
 app.use(errorHandler);
