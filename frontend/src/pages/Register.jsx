@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
-import { ScissorsIcon, GoldDivider } from '../components/BarberIcons';
+import { ScissorsIcon } from '../components/BarberIcons';
 
 function Register() {
   const { register } = useAuth();
@@ -34,103 +35,219 @@ function Register() {
     }
   }
 
+  const fields = [
+    { id: 'nombre', label: 'Nombre completo', type: 'text', placeholder: 'Tu nombre' },
+    { id: 'telefono', label: 'Telefono', type: 'tel', placeholder: '8888-0000' },
+    { id: 'email', label: 'Correo electronico', type: 'email', placeholder: 'tu@email.com' },
+    { id: 'password', label: 'Contrasena', type: 'password', placeholder: '••••••••', minLength: 6 },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0c0c0c] px-4">
-      <div className="w-full max-w-sm rounded-xl border border-gold-800/30 bg-[#141414] p-8 shadow-2xl">
-        <div className="mb-6 flex flex-col items-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-gold-600/40 bg-gold-400/10">
-            <ScissorsIcon className="h-7 w-7 text-gold-400" />
-          </div>
-          <h1 className="font-serif text-2xl text-gold-400">BarberManager</h1>
-          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-500">
-            Crea tu cuenta de cliente
-          </p>
-          <GoldDivider className="mt-5 w-full" />
-        </div>
+    <div className="flex min-h-screen bg-[#0a0a0a]">
+      {/* Panel izquierdo - Branding */}
+      <div className="hidden relative overflow-hidden lg:flex lg:w-1/2 items-center justify-center bg-[#0c0c0c]">
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'repeating-linear-gradient(45deg, #c9a96e 0, #c9a96e 1px, transparent 0, transparent 50%)',
+          backgroundSize: '24px 24px',
+        }} />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="nombre" className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Nombre completo
-            </label>
-            <input
-              id="nombre"
-              name="nombre"
-              type="text"
-              required
-              value={form.nombre}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-neutral-700/50 bg-[#1a1a1a] px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition focus:border-gold-500/60 focus:ring-1 focus:ring-gold-500/20"
-            />
-          </div>
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold-500/30 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold-500/30 to-transparent" />
+        <div className="absolute top-0 right-0 w-px h-full bg-gradient-to-b from-transparent via-gold-500/20 to-transparent" />
 
-          <div>
-            <label htmlFor="telefono" className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Telefono
-            </label>
-            <input
-              id="telefono"
-              name="telefono"
-              type="tel"
-              required
-              value={form.telefono}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-neutral-700/50 bg-[#1a1a1a] px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition focus:border-gold-500/60 focus:ring-1 focus:ring-gold-500/20"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Correo electronico
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={form.email}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-neutral-700/50 bg-[#1a1a1a] px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition focus:border-gold-500/60 focus:ring-1 focus:ring-gold-500/20"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Contrasena
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              value={form.password}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-neutral-700/50 bg-[#1a1a1a] px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition focus:border-gold-500/60 focus:ring-1 focus:ring-gold-500/20"
-            />
-          </div>
-
-          {error && (
-            <p className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm text-red-400">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-lg border border-gold-600/60 bg-gold-600/20 py-2.5 text-sm font-semibold uppercase tracking-wider text-gold-400 transition hover:bg-gold-600/30 disabled:cursor-not-allowed disabled:opacity-50"
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="relative z-10 flex flex-col items-center px-12 text-center"
+        >
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, type: 'spring', stiffness: 100 }}
+            className="mb-8 flex h-24 w-24 items-center justify-center rounded-full border-2 border-gold-500/30 bg-gold-400/5 shadow-[0_0_60px_rgba(201,169,110,0.1)]"
           >
-            {submitting ? 'Creando cuenta...' : 'Registrarme'}
-          </button>
-        </form>
+            <ScissorsIcon className="h-12 w-12 text-gold-400" />
+          </motion.div>
 
-        <p className="mt-6 text-center text-sm text-neutral-500">
-          Ya tienes cuenta?{' '}
-          <Link to="/login" className="font-medium text-gold-400 hover:text-gold-300">
-            Inicia sesion
-          </Link>
-        </p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="font-serif text-5xl font-bold text-gold-400"
+          >
+            Kenneth&apos;s
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mt-1 text-sm font-medium uppercase tracking-[0.35em] text-gold-600"
+          >
+            Barber Shop
+          </motion.p>
+
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="my-8 h-px w-48 bg-gradient-to-r from-transparent via-gold-500/50 to-transparent"
+          />
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className="max-w-xs text-sm leading-relaxed text-neutral-500"
+          >
+            Crea tu cuenta y agenda tu proxima cita en segundos. Sin llamadas, sin esperas.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1 }}
+            className="mt-10 space-y-4"
+          >
+            {[
+              { icon: '✓', text: 'Reserva citas en linea 24/7' },
+              { icon: '✓', text: 'Consulta horarios disponibles' },
+              { icon: '✓', text: 'Gestiona tus apartados' },
+            ].map((item) => (
+              <div key={item.text} className="flex items-center gap-3 text-sm text-neutral-500">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold-400/10 text-[10px] text-gold-400">
+                  {item.icon}
+                </span>
+                {item.text}
+              </div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-20 left-16 h-2 w-2 rounded-full bg-gold-500/20"
+        />
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute bottom-32 right-20 h-3 w-3 rounded-full bg-gold-500/10"
+        />
+      </div>
+
+      {/* Panel derecho - Formulario */}
+      <div className="flex w-full items-center justify-center px-6 py-12 lg:w-1/2">
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="w-full max-w-md"
+        >
+          {/* Logo mobile */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-10 flex flex-col items-center lg:hidden"
+          >
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-gold-500/30 bg-gold-400/5">
+              <ScissorsIcon className="h-8 w-8 text-gold-400" />
+            </div>
+            <h1 className="font-serif text-3xl text-gold-400">Kenneth&apos;s</h1>
+            <p className="mt-1 text-xs font-medium uppercase tracking-[0.3em] text-gold-600">Barber Shop</p>
+          </motion.div>
+
+          <div className="mb-8">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="font-serif text-3xl text-white"
+            >
+              Crear cuenta
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="mt-2 text-sm text-neutral-500"
+            >
+              Registrate para reservar tus citas en linea
+            </motion.p>
+          </div>
+
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
+            {fields.map((field, i) => (
+              <motion.div
+                key={field.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.5 + i * 0.08 }}
+              >
+                <label htmlFor={field.id} className="mb-2 block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                  {field.label}
+                </label>
+                <input
+                  id={field.id}
+                  name={field.id}
+                  type={field.type}
+                  required
+                  minLength={field.minLength}
+                  value={form[field.id]}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-neutral-800 bg-neutral-900/50 px-4 py-3.5 text-sm text-white placeholder-neutral-600 outline-none transition-all duration-300 focus:border-gold-500/50 focus:bg-neutral-900 focus:shadow-[0_0_20px_rgba(201,169,110,0.05)]"
+                  placeholder={field.placeholder}
+                />
+              </motion.div>
+            ))}
+
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-400"
+              >
+                {error}
+              </motion.p>
+            )}
+
+            <motion.button
+              type="submit"
+              disabled={submitting}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full rounded-xl bg-gradient-to-r from-gold-600 to-gold-500 py-3.5 text-sm font-bold uppercase tracking-wider text-black shadow-lg shadow-gold-500/10 transition-all duration-300 hover:shadow-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting ? 'Creando cuenta...' : 'Registrarme'}
+            </motion.button>
+          </motion.form>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
+          >
+            <div className="my-8 flex items-center gap-4">
+              <div className="h-px flex-1 bg-neutral-800" />
+              <span className="text-xs text-neutral-600">o</span>
+              <div className="h-px flex-1 bg-neutral-800" />
+            </div>
+
+            <p className="text-center text-sm text-neutral-500">
+              Ya tienes cuenta?{' '}
+              <Link to="/login" className="font-semibold text-gold-400 transition-colors hover:text-gold-300">
+                Inicia sesion
+              </Link>
+            </p>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
