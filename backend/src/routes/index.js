@@ -7,6 +7,7 @@ const appointmentRoutes = require('./appointment.routes');
 const productRoutes = require('./product.routes');
 const apartadoRoutes = require('./apartado.routes');
 const reportRoutes = require('./report.routes');
+const notificationRoutes = require('./notification.routes');
 
 const router = express.Router();
 
@@ -22,5 +23,6 @@ router.use('/citas', appointmentRoutes);
 router.use('/productos', productRoutes);
 router.use('/apartados', apartadoRoutes);
 router.use('/reportes', reportRoutes);
+router.use('/notificaciones', notificationRoutes);
 
 module.exports = router;

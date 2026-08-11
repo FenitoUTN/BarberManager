@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ScissorsIcon } from './BarberIcons';
+import NotificationBell from './NotificationBell';
 
 const ROLE_LABELS = {
   admin: 'Administrador',
@@ -160,10 +161,11 @@ function Layout() {
             <div className="flex h-9 w-9 items-center justify-center rounded-full border border-gold-600/40 bg-gold-400/10 text-sm font-semibold text-gold-400">
               {initial}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-neutral-200">{user?.nombre}</p>
               <p className="text-[11px] text-neutral-500">{ROLE_LABELS[user?.rol] || user?.rol}</p>
             </div>
+            <NotificationBell />
           </div>
           <button
             type="button"
@@ -188,14 +190,17 @@ function Layout() {
               <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-neutral-500">Kenneth&apos;s Barber</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={logout}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-700/50 px-2.5 py-1.5 text-xs font-medium text-neutral-400 hover:border-gold-600/40 hover:text-gold-400"
-          >
-            <LogoutIcon className="h-3.5 w-3.5" />
-            Salir
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              type="button"
+              onClick={logout}
+              className="flex items-center gap-1.5 rounded-lg border border-neutral-700/50 px-2.5 py-1.5 text-xs font-medium text-neutral-400 hover:border-gold-600/40 hover:text-gold-400"
+            >
+              <LogoutIcon className="h-3.5 w-3.5" />
+              Salir
+            </button>
+          </div>
         </div>
 
         <nav className="flex items-center gap-1 overflow-x-auto border-t border-gold-800/20 px-3 py-2">
