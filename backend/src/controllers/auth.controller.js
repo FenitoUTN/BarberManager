@@ -1,20 +1,32 @@
-const { validationResult } = require('express-validator');
 const userModel = require('../models/user.model');
 const { hashPassword, comparePassword } = require('../utils/password');
-const { generateToken } = require('../utils/jwt');
+const { generateToken, expiresInMs } = require('../utils/jwt');
+const { generateCsrfToken } = require('../utils/csrf');
 
 function sanitizeUser(user) {
   const { password_hash, ...safeUser } = user;
   return safeUser;
 }
 
+function cookieOptions() {
+  const maxAge = expiresInMs();
+  const secure = process.env.NODE_ENV === 'production';
+  return { maxAge, secure, sameSite: 'lax', path: '/' };
+}
+
+function setSessionCookies(res, token) {
+  const options = cookieOptions();
+  res.cookie('token', token, { ...options, httpOnly: true });
+  res.cookie('csrfToken', generateCsrfToken(), { ...options, httpOnly: false });
+}
+
+function clearSessionCookies(res) {
+  res.clearCookie('token', { path: '/' });
+  res.clearCookie('csrfToken', { path: '/' });
+}
+
 async function register(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { nombre, telefono, email, password } = req.body;
 
     const existingUser = await userModel.findByEmail(email);
@@ -32,8 +44,9 @@ async function register(req, res, next) {
     });
 
     const token = generateToken({ id: user.id, nombre: user.nombre, rol: user.rol });
+    setSessionCookies(res, token);
 
-    return res.status(201).json({ token, user });
+    return res.status(201).json({ user });
   } catch (error) {
     return next(error);
   }
@@ -41,11 +54,6 @@ async function register(req, res, next) {
 
 async function login(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { email, password } = req.body;
 
     const user = await userModel.findByEmail(email);
@@ -59,16 +67,18 @@ async function login(req, res, next) {
     }
 
     const token = generateToken({ id: user.id, nombre: user.nombre, rol: user.rol });
+    setSessionCookies(res, token);
 
-    return res.json({ token, user: sanitizeUser(user) });
+    return res.json({ user: sanitizeUser(user) });
   } catch (error) {
     return next(error);
   }
 }
 
 async function logout(req, res) {
-  // El sistema usa JWT sin estado en el servidor: cerrar sesión consiste en
-  // que el cliente descarte el token almacenado.
+  // El backend ahora emite la sesión como cookie httpOnly: cerrar sesión requiere
+  // limpiar esas cookies en el servidor (el cliente ya no puede borrarlas por JS).
+  clearSessionCookies(res);
   return res.json({ message: 'Sesión cerrada correctamente' });
 }
 

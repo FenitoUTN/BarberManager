@@ -1,14 +1,8 @@
-const { validationResult } = require('express-validator');
 const productModel = require('../models/product.model');
 
 // RF22 - Visualizar catálogo de productos
 async function list(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const isStaff = req.user.rol === 'admin' || req.user.rol === 'barbero';
     const includeInactive = isStaff && req.query.includeInactive === 'true';
 
@@ -22,11 +16,6 @@ async function list(req, res, next) {
 // RF19 - Registrar producto
 async function create(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { nombre, descripcion, precio } = req.body;
     const product = await productModel.createProduct({ nombre, descripcion, precio });
     return res.status(201).json({ product });
@@ -38,11 +27,6 @@ async function create(req, res, next) {
 // RF20 - Editar producto
 async function update(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { id } = req.params;
     const existing = await productModel.findProductById(id);
     if (!existing) {
@@ -60,11 +44,6 @@ async function update(req, res, next) {
 // RF21 - Eliminar producto (baja lógica)
 async function remove(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { id } = req.params;
     const existing = await productModel.findProductById(id);
     if (!existing) {

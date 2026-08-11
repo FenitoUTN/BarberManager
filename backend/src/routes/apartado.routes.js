@@ -2,6 +2,7 @@ const express = require('express');
 const apartadoController = require('../controllers/apartado.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/role.middleware');
+const { validate } = require('../middlewares/validate.middleware');
 const {
   createApartadoValidator,
   addAbonoValidator,
@@ -14,16 +15,17 @@ const router = express.Router();
 router.use(authenticate);
 
 // RF25/RF27 - Visualizar apartados (propios para clientes, todos para admin/barbero)
-router.get('/', listApartadosValidator, apartadoController.list);
+router.get('/', listApartadosValidator, validate, apartadoController.list);
 
 // Detalle de un apartado con historial de abonos
-router.get('/:id', idParamValidator, apartadoController.getOne);
+router.get('/:id', idParamValidator, validate, apartadoController.getOne);
 
 // RF23 - Registrar apartado de producto
 router.post(
   '/',
   authorize('admin', 'barbero'),
   createApartadoValidator,
+  validate,
   apartadoController.create
 );
 
@@ -32,6 +34,7 @@ router.post(
   '/:id/abonos',
   authorize('admin', 'barbero'),
   addAbonoValidator,
+  validate,
   apartadoController.addAbono
 );
 

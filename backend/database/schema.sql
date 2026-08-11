@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
   rol ENUM('admin', 'barbero', 'cliente') NOT NULL DEFAULT 'cliente',
   activo TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_usuarios_rol (rol)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -100,7 +101,8 @@ CREATE TABLE IF NOT EXISTS citas (
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_citas_servicio FOREIGN KEY (servicio_id) REFERENCES servicios(id)
     ON UPDATE CASCADE ON DELETE RESTRICT,
-  INDEX idx_citas_fecha (fecha)
+  INDEX idx_citas_cliente (cliente_id),
+  INDEX idx_citas_fecha_estado (fecha, estado)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -118,7 +120,9 @@ CREATE TABLE IF NOT EXISTS apartados (
   CONSTRAINT fk_apartados_cliente FOREIGN KEY (cliente_id) REFERENCES usuarios(id)
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_apartados_producto FOREIGN KEY (producto_id) REFERENCES productos(id)
-    ON UPDATE CASCADE ON DELETE RESTRICT
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  INDEX idx_apartados_cliente (cliente_id),
+  INDEX idx_apartados_estado (estado)
 ) ENGINE=InnoDB;
 
 -- Abonos realizados sobre un apartado (RF24)
@@ -130,6 +134,26 @@ CREATE TABLE IF NOT EXISTS abonos (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_abonos_apartado FOREIGN KEY (apartado_id) REFERENCES apartados(id)
     ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Módulo: Notificaciones
+-- ---------------------------------------------------------------------
+-- Notificaciones en el sistema para usuarios (ej. cancelación de citas
+-- por bloqueo de horario del administrador).
+CREATE TABLE IF NOT EXISTS notificaciones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  tipo VARCHAR(50) NOT NULL,
+  mensaje VARCHAR(255) NOT NULL,
+  cita_id INT NULL,
+  leida TINYINT(1) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_notificaciones_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT fk_notificaciones_cita FOREIGN KEY (cita_id) REFERENCES citas(id)
+    ON UPDATE CASCADE ON DELETE SET NULL,
+  INDEX idx_notificaciones_usuario (usuario_id, leida)
 ) ENGINE=InnoDB;
 
 -- =====================================================================

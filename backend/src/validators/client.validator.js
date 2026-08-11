@@ -1,4 +1,5 @@
 const { body, param, query } = require('express-validator');
+const { paginationValidator } = require('./pagination.validator');
 
 const createClientValidator = [
   body('nombre').trim().notEmpty().withMessage('El nombre es obligatorio'),
@@ -18,7 +19,7 @@ const updateClientValidator = [
 
 const idParamValidator = [param('id').isInt().withMessage('Id inválido')];
 
-const listClientsValidator = [query('search').optional().trim()];
+const listClientsValidator = [query('search').optional().trim(), ...paginationValidator];
 
 module.exports = {
   createClientValidator,

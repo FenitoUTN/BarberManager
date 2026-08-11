@@ -1,22 +1,12 @@
-const { validationResult } = require('express-validator');
 const apartadoModel = require('../models/apartado.model');
 const productModel = require('../models/product.model');
 const clientModel = require('../models/client.model');
-
-function handleValidation(req, res) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    return false;
-  }
-  return true;
-}
+const { todayISO } = require('../utils/datetime');
+const { DEFAULT_PAGE_SIZE, buildPaginationMeta } = require('../utils/pagination');
 
 // RF23 - Registrar apartado de producto (admin/barbero)
 async function create(req, res, next) {
   try {
-    if (!handleValidation(req, res)) return;
-
     const { cliente_id, producto_id, monto_total } = req.body;
 
     const cliente = await clientModel.findClientById(cliente_id);
@@ -46,8 +36,6 @@ async function create(req, res, next) {
 // RF25/RF27 - Visualizar apartados (saldo pendiente / listado de activos)
 async function list(req, res, next) {
   try {
-    if (!handleValidation(req, res)) return;
-
     const { estado } = req.query;
 
     let clienteId = req.query.clienteId;
@@ -55,8 +43,11 @@ async function list(req, res, next) {
       clienteId = req.user.id;
     }
 
-    const apartados = await apartadoModel.listAll({ estado, clienteId });
-    return res.json({ apartados });
+    const page = Number(req.query.page) || 1;
+    const pageSize = Number(req.query.pageSize) || DEFAULT_PAGE_SIZE;
+
+    const { rows, total } = await apartadoModel.listAll({ estado, clienteId, page, pageSize });
+    return res.json({ apartados: rows, pagination: buildPaginationMeta(page, pageSize, total) });
   } catch (error) {
     return next(error);
   }
@@ -65,8 +56,6 @@ async function list(req, res, next) {
 // Detalle de un apartado con su historial de abonos
 async function getOne(req, res, next) {
   try {
-    if (!handleValidation(req, res)) return;
-
     const { id } = req.params;
     const apartado = await apartadoModel.findById(id);
     if (!apartado) {
@@ -84,30 +73,18 @@ async function getOne(req, res, next) {
   }
 }
 
-// RF24 - Registrar abono a apartado (admin/barbero)
+// RF24 - Registrar abono a apartado (admin/barbero). La validación de existencia,
+// estado activo y saldo disponible ocurre de forma atómica dentro de
+// apartadoModel.addAbono (bajo el lock de fila de la transacción), evitando que dos
+// abonos concurrentes lean el mismo saldo desactualizado.
 async function addAbono(req, res, next) {
   try {
-    if (!handleValidation(req, res)) return;
-
     const { id } = req.params;
     const { monto, fecha } = req.body;
 
-    const apartado = await apartadoModel.findById(id);
-    if (!apartado) {
-      return res.status(404).json({ message: 'Apartado no encontrado' });
-    }
-
-    if (apartado.estado !== 'activo') {
-      return res.status(400).json({ message: 'El apartado no está activo' });
-    }
-
-    if (Number(monto) > Number(apartado.saldo_pendiente)) {
-      return res.status(400).json({ message: 'El abono no puede ser mayor al saldo pendiente' });
-    }
-
     const updated = await apartadoModel.addAbono(id, {
       monto,
-      fecha: fecha || new Date().toISOString().slice(0, 10),
+      fecha: fecha || todayISO(),
     });
 
     return res.status(201).json({ apartado: updated });

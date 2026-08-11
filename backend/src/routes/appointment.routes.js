@@ -2,6 +2,7 @@ const express = require('express');
 const appointmentController = require('../controllers/appointment.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/role.middleware');
+const { validate } = require('../middlewares/validate.middleware');
 const {
   createAppointmentValidator,
   listAppointmentsValidator,
@@ -18,6 +19,7 @@ router.get(
   '/',
   authorize('admin', 'barbero'),
   listAppointmentsValidator,
+  validate,
   appointmentController.list
 );
 
@@ -25,16 +27,17 @@ router.get(
 router.get('/mias', appointmentController.listMine);
 
 // RF10/RF12 - reservar cita
-router.post('/', createAppointmentValidator, appointmentController.create);
+router.post('/', createAppointmentValidator, validate, appointmentController.create);
 
 // RF11 - cancelar cita
-router.patch('/:id/cancelar', idParamValidator, appointmentController.cancel);
+router.patch('/:id/cancelar', idParamValidator, validate, appointmentController.cancel);
 
 // Admin/barbero - actualizar estado (confirmar, completar, cancelar)
 router.patch(
   '/:id/estado',
   authorize('admin', 'barbero'),
   updateEstadoValidator,
+  validate,
   appointmentController.updateEstado
 );
 

@@ -1,8 +1,11 @@
 const pool = require('../config/db');
+const { paginatedQuery } = require('../utils/pagination');
 
 const PUBLIC_FIELDS = 'id, nombre, telefono, email, rol, activo, created_at, updated_at';
 
-async function listClients({ search, includeInactive = false } = {}) {
+// Sin page/pageSize devuelve todos los resultados (comportamiento previo). Con
+// page/pageSize aplica LIMIT/OFFSET para no traer tablas completas a memoria.
+async function listClients({ search, includeInactive = false, page, pageSize } = {}) {
   const conditions = ["rol = 'cliente'"];
   const params = [];
 
@@ -16,11 +19,15 @@ async function listClients({ search, includeInactive = false } = {}) {
     params.push(term, term, term);
   }
 
-  const [rows] = await pool.query(
-    `SELECT ${PUBLIC_FIELDS} FROM usuarios WHERE ${conditions.join(' AND ')} ORDER BY nombre ASC`,
-    params
-  );
-  return rows;
+  return paginatedQuery(pool, {
+    baseQuery: `SELECT ${PUBLIC_FIELDS} FROM usuarios`,
+    countQuery: 'SELECT COUNT(*) AS total FROM usuarios',
+    where: `WHERE ${conditions.join(' AND ')}`,
+    params,
+    orderBy: 'ORDER BY nombre ASC',
+    page,
+    pageSize,
+  });
 }
 
 async function findClientById(id) {

@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const { timeToMinutes, minutesToTime, addMinutesToTime, rangesOverlap } = require('../utils/time');
+const { todayISO, nowMinutesSinceMidnight } = require('../utils/datetime');
 
 const SLOT_STEP_MINUTES = 30;
 
@@ -56,15 +57,67 @@ async function listExceptions({ desde, hasta } = {}) {
   return rows;
 }
 
+// RF15 - crea una excepción y, si es un bloqueo, cancela las citas solapadas y genera
+// sus notificaciones dentro de la MISMA transacción. Antes estos tres pasos (insertar
+// excepción, cancelar citas, notificar) eran queries independientes: si la notificación
+// fallaba a mitad de camino, las citas ya quedaban canceladas en firme sin que el
+// cliente se enterara.
 async function createException({ fecha, hora_inicio, hora_fin, tipo, motivo }) {
-  const [result] = await pool.query(
-    'INSERT INTO disponibilidad_excepciones (fecha, hora_inicio, hora_fin, tipo, motivo) VALUES (?, ?, ?, ?, ?)',
-    [fecha, hora_inicio, hora_fin, tipo, motivo || null]
-  );
-  const [rows] = await pool.query('SELECT * FROM disponibilidad_excepciones WHERE id = ?', [
-    result.insertId,
-  ]);
-  return rows[0];
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [result] = await connection.query(
+      'INSERT INTO disponibilidad_excepciones (fecha, hora_inicio, hora_fin, tipo, motivo) VALUES (?, ?, ?, ?, ?)',
+      [fecha, hora_inicio, hora_fin, tipo, motivo || null]
+    );
+    const [excRows] = await connection.query(
+      'SELECT * FROM disponibilidad_excepciones WHERE id = ?',
+      [result.insertId]
+    );
+    const excepcion = excRows[0];
+
+    let citasCanceladas = [];
+    if (tipo === 'bloqueo') {
+      const [citasRows] = await connection.query(
+        `SELECT c.id, c.cliente_id, c.fecha, c.hora_inicio, c.hora_fin, s.nombre AS servicio_nombre
+         FROM citas c
+         JOIN servicios s ON s.id = c.servicio_id
+         WHERE c.fecha = ? AND c.estado IN ('pendiente', 'confirmada')`,
+        [fecha]
+      );
+
+      const startMin = timeToMinutes(hora_inicio);
+      const endMin = timeToMinutes(hora_fin);
+      citasCanceladas = citasRows.filter((row) =>
+        rangesOverlap(startMin, endMin, timeToMinutes(row.hora_inicio), timeToMinutes(row.hora_fin))
+      );
+
+      if (citasCanceladas.length > 0) {
+        const ids = citasCanceladas.map((cita) => cita.id);
+        await connection.query("UPDATE citas SET estado = 'cancelada' WHERE id IN (?)", [ids]);
+
+        for (const cita of citasCanceladas) {
+          const fechaLabel = new Date(`${cita.fecha}T00:00:00`).toLocaleDateString('es-CR');
+          const horaLabel = cita.hora_inicio.slice(0, 5);
+          const motivoTxt = motivo ? ` (${motivo})` : '';
+          const mensaje = `Tu cita del ${fechaLabel} a las ${horaLabel} para ${cita.servicio_nombre} fue cancelada porque el local bloqueó ese horario${motivoTxt}.`;
+          await connection.query(
+            'INSERT INTO notificaciones (usuario_id, tipo, mensaje, cita_id) VALUES (?, ?, ?, ?)',
+            [cita.cliente_id, 'cita_cancelada', mensaje, cita.id]
+          );
+        }
+      }
+    }
+
+    await connection.commit();
+    return { excepcion, citasCanceladas };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 async function deleteException(id) {
@@ -105,9 +158,8 @@ async function getAvailableSlots(fecha, servicio) {
     fin: timeToMinutes(c.hora_fin),
   }));
 
-  const now = new Date();
-  const isToday = fecha === now.toISOString().slice(0, 10);
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const isToday = fecha === todayISO();
+  const currentMinutes = isToday ? nowMinutesSinceMidnight() : 0;
 
   const slots = [];
 

@@ -1,23 +1,22 @@
-const { validationResult } = require('express-validator');
 const appointmentModel = require('../models/appointment.model');
 const availabilityModel = require('../models/availability.model');
 const serviceModel = require('../models/service.model');
 const clientModel = require('../models/client.model');
+const { isBeforeNow, isAtOrBeforeNow } = require('../utils/datetime');
+const { DEFAULT_PAGE_SIZE, buildPaginationMeta } = require('../utils/pagination');
 
-function handleValidation(req, res) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    return false;
-  }
-  return true;
-}
+// Máquina de estados de una cita: solo estas transiciones están permitidas.
+// 'cancelada' y 'completada' son estados finales.
+const TRANSICIONES_VALIDAS = {
+  pendiente: ['confirmada', 'cancelada'],
+  confirmada: ['completada', 'cancelada'],
+  cancelada: [],
+  completada: [],
+};
 
 // RF10 - Reservar cita (también cubre RF12 - validar duplicidad/solapamiento)
 async function create(req, res, next) {
   try {
-    if (!handleValidation(req, res)) return;
-
     const { servicio_id, fecha, hora_inicio, notas } = req.body;
 
     let clienteId;
@@ -41,18 +40,19 @@ async function create(req, res, next) {
 
     const horaFin = availabilityModel.addMinutesToTime(hora_inicio, servicio.duracion_minutos);
 
-    // Rechaza fechas pasadas
-    const citaDateTime = new Date(`${fecha}T${hora_inicio}`);
-    if (citaDateTime < new Date()) {
+    // Rechaza fechas pasadas (comparado contra la hora actual del negocio, no del servidor)
+    if (isBeforeNow(fecha, hora_inicio)) {
       return res.status(400).json({ message: 'No se puede reservar una cita en el pasado' });
     }
 
-    // RF12 - validar que el horario no se solape con otra cita activa
-    const overlap = await appointmentModel.hasOverlap(fecha, hora_inicio, horaFin);
-    if (overlap) {
-      return res.status(409).json({ message: 'El horario seleccionado ya no está disponible' });
+    // RF09/RF15 - el horario debe caer dentro de la disponibilidad publicada
+    // (horario semanal + excepciones); antes solo se validaba en el frontend.
+    const slots = await availabilityModel.getAvailableSlots(fecha, servicio);
+    if (!slots.includes(hora_inicio)) {
+      return res.status(409).json({ message: 'El horario seleccionado no está disponible' });
     }
 
+    // RF12 - el solapamiento se valida de forma atómica dentro del modelo (lock por fecha)
     const cita = await appointmentModel.create({
       clienteId,
       servicioId: servicio.id,
@@ -71,15 +71,25 @@ async function create(req, res, next) {
 // RF13/RF14 - listar citas (día específico o historial con filtros), admin/barbero
 async function list(req, res, next) {
   try {
-    if (!handleValidation(req, res)) return;
-
     const { fecha, desde, hasta, estado, clienteId } = req.query;
 
-    const citas = fecha
-      ? await appointmentModel.listByDate(fecha)
-      : await appointmentModel.listAll({ desde, hasta, estado, clienteId });
+    if (fecha) {
+      const citas = await appointmentModel.listByDate(fecha);
+      return res.json({ citas });
+    }
 
-    return res.json({ citas });
+    const page = Number(req.query.page) || 1;
+    const pageSize = Number(req.query.pageSize) || DEFAULT_PAGE_SIZE;
+
+    const { rows, total } = await appointmentModel.listAll({
+      desde,
+      hasta,
+      estado,
+      clienteId,
+      page,
+      pageSize,
+    });
+    return res.json({ citas: rows, pagination: buildPaginationMeta(page, pageSize, total) });
   } catch (error) {
     return next(error);
   }
@@ -98,8 +108,6 @@ async function listMine(req, res, next) {
 // RF11 - cancelar cita
 async function cancel(req, res, next) {
   try {
-    if (!handleValidation(req, res)) return;
-
     const { id } = req.params;
     const cita = await appointmentModel.findById(id);
     if (!cita) {
@@ -111,17 +119,17 @@ async function cancel(req, res, next) {
         return res.status(403).json({ message: 'No tiene permisos para realizar esta acción' });
       }
 
-      const citaDateTime = new Date(`${cita.fecha}T${cita.hora_inicio}`);
-      if (citaDateTime <= new Date()) {
+      if (isAtOrBeforeNow(cita.fecha, cita.hora_inicio)) {
         return res.status(400).json({ message: 'No se puede cancelar una cita que ya pasó' });
       }
     }
 
-    if (cita.estado === 'cancelada') {
-      return res.status(400).json({ message: 'La cita ya está cancelada' });
-    }
-    if (cita.estado === 'completada') {
-      return res.status(400).json({ message: 'No se puede cancelar una cita completada' });
+    if (!TRANSICIONES_VALIDAS[cita.estado]?.includes('cancelada')) {
+      const message =
+        cita.estado === 'cancelada'
+          ? 'La cita ya está cancelada'
+          : 'No se puede cancelar una cita completada';
+      return res.status(400).json({ message });
     }
 
     const updated = await appointmentModel.updateEstado(id, 'cancelada');
@@ -134,14 +142,18 @@ async function cancel(req, res, next) {
 // Admin/barbero - actualizar estado de una cita (confirmar, completar, cancelar)
 async function updateEstado(req, res, next) {
   try {
-    if (!handleValidation(req, res)) return;
-
     const { id } = req.params;
     const { estado } = req.body;
 
     const cita = await appointmentModel.findById(id);
     if (!cita) {
       return res.status(404).json({ message: 'Cita no encontrada' });
+    }
+
+    if (!TRANSICIONES_VALIDAS[cita.estado]?.includes(estado)) {
+      return res.status(400).json({
+        message: `No se puede cambiar el estado de "${cita.estado}" a "${estado}"`,
+      });
     }
 
     const updated = await appointmentModel.updateEstado(id, estado);

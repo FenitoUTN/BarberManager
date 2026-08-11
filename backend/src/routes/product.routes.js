@@ -2,6 +2,7 @@ const express = require('express');
 const productController = require('../controllers/product.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/role.middleware');
+const { validate } = require('../middlewares/validate.middleware');
 const {
   createProductValidator,
   updateProductValidator,
@@ -14,16 +15,23 @@ const router = express.Router();
 router.use(authenticate);
 
 // RF22 - Visualizar catálogo de productos
-router.get('/', listProductsValidator, productController.list);
+router.get('/', listProductsValidator, validate, productController.list);
 
 // RF19 - Registrar producto
-router.post('/', authorize('admin', 'barbero'), createProductValidator, productController.create);
+router.post(
+  '/',
+  authorize('admin', 'barbero'),
+  createProductValidator,
+  validate,
+  productController.create
+);
 
 // RF20 - Editar producto
 router.put(
   '/:id',
   authorize('admin', 'barbero'),
   updateProductValidator,
+  validate,
   productController.update
 );
 
@@ -32,6 +40,7 @@ router.delete(
   '/:id',
   authorize('admin', 'barbero'),
   idParamValidator,
+  validate,
   productController.remove
 );
 

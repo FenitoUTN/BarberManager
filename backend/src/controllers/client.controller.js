@@ -1,5 +1,5 @@
-const { validationResult } = require('express-validator');
 const clientModel = require('../models/client.model');
+const { DEFAULT_PAGE_SIZE, buildPaginationMeta } = require('../utils/pagination');
 
 function canAccessClient(reqUser, clientId) {
   if (reqUser.rol === 'admin' || reqUser.rol === 'barbero') return true;
@@ -8,14 +8,12 @@ function canAccessClient(reqUser, clientId) {
 
 async function list(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { search } = req.query;
-    const clients = await clientModel.listClients({ search });
-    return res.json({ clients });
+    const page = Number(req.query.page) || 1;
+    const pageSize = Number(req.query.pageSize) || DEFAULT_PAGE_SIZE;
+
+    const { rows, total } = await clientModel.listClients({ search, page, pageSize });
+    return res.json({ clients: rows, pagination: buildPaginationMeta(page, pageSize, total) });
   } catch (error) {
     return next(error);
   }
@@ -23,11 +21,6 @@ async function list(req, res, next) {
 
 async function getById(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { id } = req.params;
 
     if (!canAccessClient(req.user, id)) {
@@ -47,11 +40,6 @@ async function getById(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { nombre, telefono, email } = req.body;
 
     if (email) {
@@ -70,11 +58,6 @@ async function create(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { id } = req.params;
 
     if (!canAccessClient(req.user, id)) {
@@ -104,11 +87,6 @@ async function update(req, res, next) {
 
 async function remove(req, res, next) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: 'Datos inválidos', errors: errors.array() });
-    }
-
     const { id } = req.params;
 
     const existingClient = await clientModel.findClientById(id);

@@ -1,4 +1,5 @@
 const { body, query, param } = require('express-validator');
+const { paginationValidator } = require('./pagination.validator');
 
 const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -20,6 +21,7 @@ const listAppointmentsValidator = [
     .isIn(['pendiente', 'confirmada', 'cancelada', 'completada'])
     .withMessage('Estado inválido'),
   query('clienteId').optional().isInt().withMessage('Cliente inválido'),
+  ...paginationValidator,
 ];
 
 const idParamValidator = [param('id').isInt().withMessage('Id inválido')];

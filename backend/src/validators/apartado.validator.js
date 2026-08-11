@@ -1,4 +1,5 @@
 const { body, param, query } = require('express-validator');
+const { paginationValidator } = require('./pagination.validator');
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -25,6 +26,7 @@ const listApartadosValidator = [
     .isIn(['activo', 'pagado', 'cancelado'])
     .withMessage('Estado inválido'),
   query('clienteId').optional().isInt().withMessage('Cliente inválido'),
+  ...paginationValidator,
 ];
 
 module.exports = {

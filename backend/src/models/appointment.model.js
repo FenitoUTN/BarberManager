@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const { rangesOverlap, timeToMinutes } = require('../utils/time');
+const { paginatedQuery } = require('../utils/pagination');
 
 const SELECT_FIELDS = `
   c.id, c.cliente_id, c.servicio_id, c.fecha, c.hora_inicio, c.hora_fin, c.estado, c.notas,
@@ -29,8 +30,8 @@ async function listByDate(fecha) {
   return rows;
 }
 
-// RF14 - historial general con filtros opcionales
-async function listAll({ desde, hasta, estado, clienteId } = {}) {
+// RF14 - historial general con filtros opcionales, paginado
+async function listAll({ desde, hasta, estado, clienteId, page, pageSize } = {}) {
   const conditions = [];
   const params = [];
 
@@ -52,11 +53,16 @@ async function listAll({ desde, hasta, estado, clienteId } = {}) {
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  const [rows] = await pool.query(
-    `${BASE_QUERY} ${where} ORDER BY c.fecha DESC, c.hora_inicio DESC`,
-    params
-  );
-  return rows;
+
+  return paginatedQuery(pool, {
+    baseQuery: BASE_QUERY,
+    countQuery: 'SELECT COUNT(*) AS total FROM citas c',
+    where,
+    params,
+    orderBy: 'ORDER BY c.fecha DESC, c.hora_inicio DESC',
+    page,
+    pageSize,
+  });
 }
 
 // RF16 - citas de un cliente
@@ -68,36 +74,50 @@ async function listByClient(clienteId) {
   return rows;
 }
 
-// RF12 - verifica si ya existe una cita activa que se solape con el horario indicado
-async function hasOverlap(fecha, horaInicio, horaFin, excludeId = null) {
-  const params = [fecha];
-  let query = `
-    SELECT hora_inicio, hora_fin FROM citas
-    WHERE fecha = ? AND estado IN ('pendiente', 'confirmada')
-  `;
-
-  if (excludeId) {
-    query += ' AND id != ?';
-    params.push(excludeId);
-  }
-
-  const [rows] = await pool.query(query, params);
-
-  const startMin = timeToMinutes(horaInicio);
-  const endMin = timeToMinutes(horaFin);
-
-  return rows.some((row) =>
-    rangesOverlap(startMin, endMin, timeToMinutes(row.hora_inicio), timeToMinutes(row.hora_fin))
-  );
-}
-
-// RF10 - reservar cita
+// RF10/RF12 - reserva una cita de forma atómica: usa un lock con nombre de MySQL
+// por fecha para serializar el chequeo de solapamiento y el insert entre requests
+// concurrentes (evita dobles reservas por condición de carrera).
 async function create({ clienteId, servicioId, fecha, horaInicio, horaFin, notas }) {
-  const [result] = await pool.query(
-    'INSERT INTO citas (cliente_id, servicio_id, fecha, hora_inicio, hora_fin, notas) VALUES (?, ?, ?, ?, ?, ?)',
-    [clienteId, servicioId, fecha, horaInicio, horaFin, notas || null]
-  );
-  return findById(result.insertId);
+  const lockName = `citas:${fecha}`;
+  const connection = await pool.getConnection();
+  try {
+    const [[{ obtenido }]] = await connection.query('SELECT GET_LOCK(?, 10) AS obtenido', [
+      lockName,
+    ]);
+    if (obtenido !== 1) {
+      throw Object.assign(new Error('No se pudo procesar la reserva, intente de nuevo'), {
+        status: 503,
+      });
+    }
+
+    try {
+      const [rows] = await connection.query(
+        `SELECT hora_inicio, hora_fin FROM citas WHERE fecha = ? AND estado IN ('pendiente', 'confirmada')`,
+        [fecha]
+      );
+
+      const startMin = timeToMinutes(horaInicio);
+      const endMin = timeToMinutes(horaFin);
+      const overlap = rows.some((row) =>
+        rangesOverlap(startMin, endMin, timeToMinutes(row.hora_inicio), timeToMinutes(row.hora_fin))
+      );
+      if (overlap) {
+        throw Object.assign(new Error('El horario seleccionado ya no está disponible'), {
+          status: 409,
+        });
+      }
+
+      const [result] = await connection.query(
+        'INSERT INTO citas (cliente_id, servicio_id, fecha, hora_inicio, hora_fin, notas) VALUES (?, ?, ?, ?, ?, ?)',
+        [clienteId, servicioId, fecha, horaInicio, horaFin, notas || null]
+      );
+      return findById(result.insertId);
+    } finally {
+      await connection.query('SELECT RELEASE_LOCK(?)', [lockName]);
+    }
+  } finally {
+    connection.release();
+  }
 }
 
 async function updateEstado(id, estado) {
@@ -110,7 +130,6 @@ module.exports = {
   listByDate,
   listAll,
   listByClient,
-  hasOverlap,
   create,
   updateEstado,
 };
