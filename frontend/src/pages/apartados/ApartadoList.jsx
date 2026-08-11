@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApartados } from '../../api/apartados';
 import { formatPrice, formatDate } from '../../utils/format';
+import Pagination from '../../components/Pagination';
+
+const PAGE_SIZE = 20;
 
 const ESTADO_LABELS = {
   activo: 'Activo',
@@ -32,16 +35,18 @@ function ApartadoList() {
   const isStaff = user?.rol === 'admin' || user?.rol === 'barbero';
 
   const [apartados, setApartados] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 1 });
   const [estado, setEstado] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  async function loadApartados() {
+  async function loadApartados(page = 1) {
     setLoading(true);
     setError('');
     try {
-      const data = await getApartados(estado ? { estado } : {});
-      setApartados(data);
+      const data = await getApartados({ estado: estado || undefined, page, pageSize: PAGE_SIZE });
+      setApartados(data.apartados);
+      setPagination(data.pagination);
     } catch (err) {
       setError(err.response?.data?.message || 'No fue posible cargar los apartados');
     } finally {
@@ -145,6 +150,12 @@ function ApartadoList() {
               ))}
             </tbody>
           </table>
+          <Pagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            total={pagination.total}
+            onPageChange={loadApartados}
+          />
         </div>
       )}
     </div>

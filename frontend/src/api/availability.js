@@ -24,7 +24,7 @@ export async function getExceptions(filters = {}) {
 
 export async function createException(payload) {
   const { data } = await axiosClient.post('/disponibilidad/excepciones', payload);
-  return data.excepcion;
+  return data;
 }
 
 export async function deleteException(id) {

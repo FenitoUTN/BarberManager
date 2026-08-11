@@ -157,6 +157,7 @@ function Exceptions() {
   const [exceptions, setExceptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [form, setForm] = useState({
@@ -193,9 +194,15 @@ function Exceptions() {
     event.preventDefault();
     setSubmitting(true);
     setError('');
+    setSuccess('');
     try {
-      await createException(form);
+      const { citasCanceladas } = await createException(form);
       setForm((prev) => ({ ...prev, motivo: '' }));
+      if (citasCanceladas > 0) {
+        setSuccess(
+          `Bloqueo agregado. Se cancelaron ${citasCanceladas} cita(s) y se notificó a los clientes.`
+        );
+      }
       await load();
     } catch (err) {
       const message =
@@ -309,6 +316,11 @@ function Exceptions() {
       {error && (
         <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
           {error}
+        </p>
+      )}
+      {success && (
+        <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
+          {success}
         </p>
       )}
 

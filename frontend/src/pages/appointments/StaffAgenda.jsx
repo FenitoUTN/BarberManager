@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { getAgenda, getAppointmentHistory, updateAppointmentStatus } from '../../api/appointments';
 import EstadoBadge, { ESTADO_LABELS } from '../../components/EstadoBadge';
 import BookingForm from './BookingForm';
+import Pagination from '../../components/Pagination';
 import { formatDate, formatPrice, formatTime, todayISO } from '../../utils/format';
+
+const PAGE_SIZE = 20;
 
 function TabButton({ active, onClick, children }) {
   return (
@@ -171,6 +174,7 @@ function TodayAgenda() {
 function History() {
   const [filters, setFilters] = useState({ desde: '', hasta: '', estado: '' });
   const [citas, setCitas] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
@@ -179,24 +183,29 @@ function History() {
     setFilters((prev) => ({ ...prev, [event.target.name]: event.target.value }));
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  async function search(page = 1) {
     setLoading(true);
     setError('');
     setSearched(true);
     try {
-      const params = {};
+      const params = { page, pageSize: PAGE_SIZE };
       if (filters.desde) params.desde = filters.desde;
       if (filters.hasta) params.hasta = filters.hasta;
       if (filters.estado) params.estado = filters.estado;
 
       const data = await getAppointmentHistory(params);
-      setCitas(data);
+      setCitas(data.citas);
+      setPagination(data.pagination);
     } catch (err) {
       setError(err.response?.data?.message || 'No fue posible cargar el historial');
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    search(1);
   }
 
   return (
@@ -295,6 +304,12 @@ function History() {
                 ))}
               </tbody>
             </table>
+            <Pagination
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              total={pagination.total}
+              onPageChange={search}
+            />
           </div>
         )
       )}

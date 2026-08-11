@@ -1,5 +1,11 @@
 export function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  // Fecha local del navegador (no UTC): toISOString() puede saltar al día
+  // siguiente/anterior según la zona horaria del usuario y la hora del día.
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 export function formatPrice(precio) {

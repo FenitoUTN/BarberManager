@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getServices } from '../../api/services';
 import { getSlots } from '../../api/availability';
-import { getClients } from '../../api/clients';
+import { getClientOptions } from '../../api/clients';
 import { bookAppointment } from '../../api/appointments';
 import { formatPrice, formatTime, todayISO } from '../../utils/format';
 
@@ -31,7 +31,7 @@ function BookingForm({ showClientSelect = false, onBooked, onViewAppointments })
 
       if (showClientSelect) {
         try {
-          const data = await getClients();
+          const data = await getClientOptions();
           setClients(data);
           if (data.length > 0) setClienteId(String(data[0].id));
         } catch (err) {

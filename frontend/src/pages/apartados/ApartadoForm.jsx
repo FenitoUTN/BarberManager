@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createApartado } from '../../api/apartados';
-import { getClients } from '../../api/clients';
+import { getClientOptions } from '../../api/clients';
 import { getProducts } from '../../api/products';
 import { formatPrice } from '../../utils/format';
 
@@ -20,7 +20,7 @@ function ApartadoForm() {
       setLoading(true);
       setError('');
       try {
-        const [clientsData, productsData] = await Promise.all([getClients(), getProducts()]);
+        const [clientsData, productsData] = await Promise.all([getClientOptions(), getProducts()]);
         setClients(clientsData);
         setProducts(productsData);
       } catch (err) {

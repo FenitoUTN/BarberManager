@@ -1,19 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { deleteClient, getClients } from '../../api/clients';
+import Pagination from '../../components/Pagination';
+
+const PAGE_SIZE = 20;
 
 function ClientList() {
   const [clients, setClients] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 1 });
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  async function loadClients(term = '') {
+  async function loadClients(term = '', page = 1) {
     setLoading(true);
     setError('');
     try {
-      const data = await getClients(term);
-      setClients(data);
+      const data = await getClients(term, { page, pageSize: PAGE_SIZE });
+      setClients(data.clients);
+      setPagination(data.pagination);
     } catch (err) {
       setError(err.response?.data?.message || 'No fue posible cargar los clientes');
     } finally {
@@ -28,7 +33,11 @@ function ClientList() {
 
   function handleSearchSubmit(event) {
     event.preventDefault();
-    loadClients(search);
+    loadClients(search, 1);
+  }
+
+  function handlePageChange(page) {
+    loadClients(search, page);
   }
 
   async function handleDelete(id) {
@@ -36,7 +45,7 @@ function ClientList() {
 
     try {
       await deleteClient(id);
-      setClients((prev) => prev.filter((client) => client.id !== id));
+      loadClients(search, pagination.page);
     } catch (err) {
       setError(err.response?.data?.message || 'No fue posible eliminar el cliente');
     }
@@ -114,6 +123,12 @@ function ClientList() {
               ))}
             </tbody>
           </table>
+          <Pagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            total={pagination.total}
+            onPageChange={handlePageChange}
+          />
         </div>
       )}
     </div>

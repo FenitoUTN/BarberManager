@@ -5,22 +5,17 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // La sesión vive en una cookie httpOnly (invisible para JS), así que la única
+    // forma de saber si hay una sesión activa al cargar la app es preguntarle al
+    // backend directamente.
     async function loadUser() {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const { data } = await axiosClient.get('/auth/me');
         setUser(data.user);
       } catch {
-        localStorage.removeItem('token');
-        setToken(null);
         setUser(null);
       } finally {
         setLoading(false);
@@ -28,17 +23,11 @@ export function AuthProvider({ children }) {
     }
 
     loadUser();
-  }, [token]);
-
-  function persistSession(data) {
-    localStorage.setItem('token', data.token);
-    setToken(data.token);
-    setUser(data.user);
-  }
+  }, []);
 
   async function login(email, password) {
     const { data } = await axiosClient.post('/auth/login', { email, password });
-    persistSession(data);
+    setUser(data.user);
     return data.user;
   }
 
@@ -49,7 +38,7 @@ export function AuthProvider({ children }) {
       email,
       password,
     });
-    persistSession(data);
+    setUser(data.user);
     return data.user;
   }
 
@@ -57,13 +46,11 @@ export function AuthProvider({ children }) {
     try {
       await axiosClient.post('/auth/logout');
     } finally {
-      localStorage.removeItem('token');
-      setToken(null);
       setUser(null);
     }
   }
 
-  const value = { user, token, loading, login, register, logout };
+  const value = { user, loading, login, register, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -10,6 +10,7 @@ import ClientForm from './pages/clients/ClientForm';
 import ClientProfile from './pages/clients/ClientProfile';
 import Agenda from './pages/appointments/Agenda';
 import ServiceList from './pages/services/ServiceList';
+import ServiceForm from './pages/services/ServiceForm';
 import Availability from './pages/availability/Availability';
 import ProductList from './pages/products/ProductList';
 import ProductForm from './pages/products/ProductForm';
@@ -41,6 +42,8 @@ function App() {
               <Route path="/clientes/nuevo" element={<ClientForm />} />
               <Route path="/clientes/:id/editar" element={<ClientForm />} />
               <Route path="/disponibilidad" element={<Availability />} />
+              <Route path="/servicios/nuevo" element={<ServiceForm />} />
+              <Route path="/servicios/:id/editar" element={<ServiceForm />} />
               <Route path="/productos/nuevo" element={<ProductForm />} />
               <Route path="/productos/:id/editar" element={<ProductForm />} />
               <Route path="/apartados/nuevo" element={<ApartadoForm />} />

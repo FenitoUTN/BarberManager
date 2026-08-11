@@ -1,12 +1,12 @@
 import axiosClient from './axiosClient';
 
-export async function getApartados({ estado, clienteId } = {}) {
-  const params = {};
+export async function getApartados({ estado, clienteId, page = 1, pageSize = 20 } = {}) {
+  const params = { page, pageSize };
   if (estado) params.estado = estado;
   if (clienteId) params.clienteId = clienteId;
 
   const { data } = await axiosClient.get('/apartados', { params });
-  return data.apartados;
+  return data;
 }
 
 export async function getApartado(id) {

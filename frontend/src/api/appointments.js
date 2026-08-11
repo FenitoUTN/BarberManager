@@ -12,7 +12,7 @@ export async function getAgenda(fecha) {
 
 export async function getAppointmentHistory(filters = {}) {
   const { data } = await axiosClient.get('/citas', { params: filters });
-  return data.citas;
+  return data;
 }
 
 export async function bookAppointment(payload) {
