@@ -49,6 +49,13 @@ app.use('/api/auth/register', registerLimiter);
 
 app.use('/api', apiRoutes);
 
+// Cualquier ruta /api que no exista responde 404 en JSON. Sin esto, el catch-all de
+// más abajo leería index.html y devolvería 200 con HTML al pedir un endpoint mal
+// escrito, que es la peor forma de fallar: el error se descubre en el cliente.
+app.use('/api', (req, res) => {
+  res.status(404).json({ message: 'Recurso no encontrado' });
+});
+
 const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
 app.use(express.static(frontendDist));
 

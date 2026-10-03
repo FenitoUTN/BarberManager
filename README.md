@@ -227,6 +227,7 @@ cd backend
 cp .env.example .env   # ajustar credenciales de MySQL y JWT_SECRET
 mysql -u root -p < database/schema.sql
 npm install
+npm run create-admin    # crea el admin e imprime su contraseña una sola vez
 npm run dev             # nodemon en el puerto definido por PORT (default 3000)
 ```
 
@@ -256,10 +257,21 @@ npm run build   # genera frontend/dist; backend/src/app.js lo sirve automáticam
 npm start        # arranca solo el backend, que sirve API + frontend ya compilado
 ```
 
-## Credenciales de prueba
+## Administrador inicial
 
-| Rol | Email | Password |
-| --- | --- | --- |
-| admin | `admin@barbermanager.com` | `Admin123!` |
+El repositorio **no incluye** ninguna credencial de administrador, ni siquiera con hash: una
+contraseña fija versionada es una contraseña pública, y el historial de git la conserva aunque se
+borre del archivo.
 
-Los usuarios con rol `cliente` se crean desde `/register`. Los roles `admin`/`barbero` no tienen alta desde la UI — se asignan directamente en la base de datos (columna `rol` de `usuarios`).
+```bash
+cd backend
+npm run create-admin                          # genera una contraseña aleatoria
+ADMIN_PASSWORD='mi clave' npm run create-admin # o fija una vos
+```
+
+El comando imprime la contraseña **una sola vez**. Para cambiar la de un admin existente hay que
+volver a correrlo con `ADMIN_PASSWORD` definida. Para crear otro admin, usar `ADMIN_EMAIL`,
+`ADMIN_NAME` y `ADMIN_PHONE`.
+
+Los usuarios con rol `cliente` se crean desde `/register`. El rol `barbero` se asigna desde la base
+de datos (columna `rol` de `usuarios`); `admin` solo mediante el comando anterior.

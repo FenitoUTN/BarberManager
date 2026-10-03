@@ -2,10 +2,9 @@
 -- BarberManager - Esquema de Base de Datos
 -- Sistema Web de Gestión para Kenneth's Barber
 -- =====================================================================
--- Cubre las tablas necesarias para los 27 requerimientos funcionales
--- (RF01-RF27) descritos en docs/Documento_Formal.md, organizados por
--- módulo: autenticación, clientes, agenda/citas, servicios, productos,
--- apartados y reportes.
+-- Cubre las tablas necesarias para los requerimientos funcionales descritos en el
+-- README (módulos: autenticación, clientes, agenda/citas, servicios, productos,
+-- apartados, reportes y notificaciones).
 -- =====================================================================
 
 CREATE DATABASE IF NOT EXISTS barbermanager
@@ -167,13 +166,17 @@ INSERT INTO servicios (nombre, precio, duracion_minutos) VALUES
 ON DUPLICATE KEY UPDATE nombre = nombre;
 
 -- Usuario administrador inicial
--- Email: admin@barbermanager.com
--- Password: Admin123!  (cambiar en producción)
--- El hash fue generado con bcryptjs (10 salt rounds)
-INSERT INTO usuarios (nombre, telefono, email, password_hash, rol) VALUES
-  ('Kenneth Rodríguez', '6406-3210', 'admin@barbermanager.com',
-   '$2a$10$TwEOBkfnAOEgWZjh.DIe6O5a61W3P3dKRQI.r4N3Mo9xTfh7qy29K', 'admin')
-ON DUPLICATE KEY UPDATE nombre = nombre;
+--
+-- NO se siembra aquí, a propósito. Una credencial con hash fijo en el repositorio
+-- es una credencial pública: cualquiera con acceso al repo (o a su historial) puede
+-- iniciar sesión como administrador. Este archivo queda en control de versiones, así
+-- que solo contiene estructura; los usuarios se crean fuera de él.
+--
+-- Para crear el primer administrador, desde backend/:
+--     npm run create-admin
+-- Genera una contraseña aleatoria y la imprime una sola vez en la terminal, o usa
+-- ADMIN_PASSWORD si la querés fijar vos. El hash se guarda en la base, nunca el
+-- texto plano.
 
 -- Horario semanal por defecto: Lunes a Sábado, 8:00am - 6:00pm
 INSERT INTO disponibilidad_horarios (dia_semana, hora_inicio, hora_fin) VALUES
