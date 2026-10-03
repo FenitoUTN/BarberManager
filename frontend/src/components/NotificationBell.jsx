@@ -29,20 +29,38 @@ function NotificationBell() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
 
-  async function load() {
-    try {
-      const { notificaciones, noLeidas } = await getNotifications();
-      setNotifications(notificaciones);
-      setUnreadCount(noLeidas);
-    } catch {
-      // silencioso: la campana no debe interrumpir el resto de la app
-    }
-  }
-
+  // Sondeo recursivo con setTimeout en lugar de setInterval. Además de evitar el
+  // setState síncrono en el cuerpo del efecto (que provocaba renders en cascada y
+  // disparaba react-hooks/set-state-in-effect), garantiza que la siguiente consulta
+  // no arranque hasta que termine la anterior: con setInterval dos peticiones se
+  // solapaban si una tardaba más que POLL_INTERVAL_MS.
   useEffect(() => {
-    load();
-    const interval = setInterval(load, POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    let timerId;
+
+    async function poll() {
+      try {
+        const { notificaciones, noLeidas } = await getNotifications();
+        if (!cancelled) {
+          setNotifications(notificaciones);
+          setUnreadCount(noLeidas);
+        }
+      } catch {
+        // silencioso: la campana no debe interrumpir el resto de la app
+      } finally {
+        if (!cancelled) {
+          timerId = setTimeout(poll, POLL_INTERVAL_MS);
+        }
+      }
+    }
+
+    // El primer sondeo arranca en una tarea aparte, no dentro del cuerpo del efecto.
+    timerId = setTimeout(poll, 0);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timerId);
+    };
   }, []);
 
   useEffect(() => {
@@ -88,6 +106,8 @@ function NotificationBell() {
         type="button"
         onClick={handleToggle}
         aria-label="Notificaciones"
+        aria-expanded={open}
+        aria-haspopup="true"
         className="relative flex h-9 w-9 items-center justify-center rounded-full border border-neutral-700/50 text-neutral-400 transition hover:border-gold-600/40 hover:text-gold-400"
       >
         <BellIcon className="h-4 w-4" />
@@ -97,6 +117,14 @@ function NotificationBell() {
           </span>
         )}
       </button>
+
+      {/* El contador se actualiza por sondeo, sin que el foco cambie de lugar: hay que
+          anunciarlo para que no dependa solo de la vista. */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {unreadCount > 0
+          ? `${unreadCount} ${unreadCount === 1 ? 'notificación sin leer' : 'notificaciones sin leer'}`
+          : 'No hay notificaciones sin leer'}
+      </span>
 
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-80 max-w-[90vw] rounded-xl border border-neutral-800 bg-neutral-900 shadow-xl shadow-black/40">

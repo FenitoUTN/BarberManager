@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { createService, getService, updateService } from '../../api/services';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import ErrorState from '../../components/ui/ErrorState';
+import Field from '../../components/ui/Field';
+import Input from '../../components/ui/Input';
+import LoadingState from '../../components/ui/LoadingState';
+import PageHeader from '../../components/ui/PageHeader';
 
 function ServiceForm() {
   const { id } = useParams();
@@ -11,6 +19,10 @@ function ServiceForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(isEditing);
   const [submitting, setSubmitting] = useState(false);
+  const [noEncontrado, setNoEncontrado] = useState(false);
+  // Reintento de la carga inicial: sin este contador el efecto no vuelve a dispararse y el
+  // botón de reintentar no tendría a qué responder.
+  const [intento, setIntento] = useState(0);
 
   useEffect(() => {
     if (!isEditing) return;
@@ -18,10 +30,11 @@ function ServiceForm() {
     async function loadService() {
       setLoading(true);
       setError('');
+      setNoEncontrado(false);
       try {
         const service = await getService(id);
         if (!service) {
-          setError('Servicio no encontrado');
+          setNoEncontrado(true);
           return;
         }
         setForm({
@@ -37,7 +50,7 @@ function ServiceForm() {
     }
 
     loadService();
-  }, [id, isEditing]);
+  }, [id, isEditing, intento]);
 
   function handleChange(event) {
     setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }));
@@ -72,80 +85,128 @@ function ServiceForm() {
     }
   }
 
+  const titulo = isEditing ? 'Editar servicio' : 'Nuevo servicio';
+
   if (loading) {
-    return <p className="text-sm text-neutral-500">Cargando...</p>;
+    return (
+      <div className="space-y-6">
+        <PageHeader title={titulo} />
+        <LoadingState label="Cargando el servicio" className="surface-card" />
+      </div>
+    );
+  }
+
+  // Un id que no existe no es un error de red: reintentar devuelve lo mismo. Se ofrece
+  // volver al catálogo, que es lo único que tiene sentido hacer desde acá.
+  if (noEncontrado) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title={titulo} />
+        <Card padding="none">
+          <EmptyState
+            title="Ese servicio no existe"
+            description="Puede que se haya eliminado mientras tenías esta pestaña abierta."
+            action={
+              <Button as={Link} to="/servicios" variant="secondary">
+                Volver al catálogo
+              </Button>
+            }
+          />
+        </Card>
+      </div>
+    );
+  }
+
+  const falloDeCarga = isEditing && Boolean(error) && !form.nombre;
+
+  if (falloDeCarga) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title={titulo} />
+        <ErrorState
+          title="No pudimos cargar el servicio"
+          message="El formulario no aparece en pantalla. Vuelve a intentarlo en un momento."
+          onRetry={() => setIntento((n) => n + 1)}
+          className="surface-card"
+        />
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-      <h2 className="mb-4 font-serif text-2xl tracking-wide text-gold-400">
-        {isEditing ? 'Editar servicio' : 'Nuevo servicio'}
-      </h2>
+    <div className="space-y-6">
+      <PageHeader
+        title={titulo}
+        description={
+          isEditing
+            ? 'Actualizá el precio o la duración del servicio.'
+            : 'El servicio nuevo queda disponible en el catálogo al guardarlo.'
+        }
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="nombre" className="mb-1.5 block text-sm font-medium text-neutral-300">
-            Nombre
-          </label>
-          <input
-            id="nombre"
-            name="nombre"
-            type="text"
+      <Card className="max-w-xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Field label="Nombre" htmlFor="nombre" required>
+            <Input
+              id="nombre"
+              name="nombre"
+              type="text"
+              required
+              value={form.nombre}
+              onChange={handleChange}
+            />
+          </Field>
+
+          <Field label="Precio (₡)" htmlFor="precio" required>
+            <Input
+              id="precio"
+              name="precio"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              value={form.precio}
+              onChange={handleChange}
+            />
+          </Field>
+
+          <Field
+            label="Duración (minutos)"
+            htmlFor="duracion_minutos"
             required
-            value={form.nombre}
-            onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
-          />
-        </div>
+            hint="Cuánto tiempo ocupa la silla, en minutos."
+          >
+            <Input
+              id="duracion_minutos"
+              name="duracion_minutos"
+              type="number"
+              min="1"
+              step="1"
+              required
+              value={form.duracion_minutos}
+              onChange={handleChange}
+            />
+          </Field>
 
-        <div>
-          <label htmlFor="precio" className="mb-1.5 block text-sm font-medium text-neutral-300">
-            Precio (₡)
-          </label>
-          <input
-            id="precio"
-            name="precio"
-            type="number"
-            min="0"
-            step="0.01"
-            required
-            value={form.precio}
-            onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
-          />
-        </div>
+          {error && (
+            <p
+              role="alert"
+              className="rounded-field border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+            >
+              {error}
+            </p>
+          )}
 
-        <div>
-          <label htmlFor="duracion_minutos" className="mb-1.5 block text-sm font-medium text-neutral-300">
-            Duración (minutos)
-          </label>
-          <input
-            id="duracion_minutos"
-            name="duracion_minutos"
-            type="number"
-            min="1"
-            step="1"
-            required
-            value={form.duracion_minutos}
-            onChange={handleChange}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
-          />
-        </div>
-
-        {error && (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-gold-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {submitting ? 'Guardando...' : 'Guardar'}
-        </button>
-      </form>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Button type="submit" loading={submitting}>
+              {isEditing ? 'Guardar cambios' : 'Crear servicio'}
+            </Button>
+            <Button variant="ghost" as={Link} to="/servicios">
+              Cancelar
+            </Button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 }

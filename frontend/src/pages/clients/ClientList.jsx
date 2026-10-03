@@ -2,8 +2,43 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { deleteClient, getClients } from '../../api/clients';
 import Pagination from '../../components/Pagination';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import ErrorState from '../../components/ui/ErrorState';
+import Field from '../../components/ui/Field';
+import Input from '../../components/ui/Input';
+import LoadingState from '../../components/ui/LoadingState';
+import PageHeader from '../../components/ui/PageHeader';
 
 const PAGE_SIZE = 20;
+
+// Mismo trazo que el resto del proyecto (viewBox 24x24, fill none, stroke currentColor,
+// strokeWidth 1.5). Decorativo: el EmptyState ya dice con palabras qué falta.
+function UsersIcon({ className }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+
+// Encabezado de columna. Se comparte para que las cuatro columnas midan lo mismo sin
+// repetir la cadena en cada <th>.
+const TH = 'px-5 py-3 text-left text-xs font-medium text-ink-subtle';
 
 function ClientList() {
   const [clients, setClients] = useState([]);
@@ -51,85 +86,150 @@ function ClientList() {
     }
   }
 
+  // Un fallo de carga con filas todavía en pantalla no tapa las filas: se avisa arriba de la
+  // tabla y el usuario sigue viendo lo último que sí llegó. El ErrorState a pantalla queda
+  // para cuando no hay nada que mostrar.
+  const falloDeCarga = Boolean(error) && clients.length === 0;
+
   return (
-    <div className="rounded-xl border border-gold-800/20 bg-[#141414] p-6">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-serif text-2xl text-gold-400">Clientes</h2>
-        <Link
-          to="/clientes/nuevo"
-          className="rounded-lg border border-gold-600/60 bg-gold-600/20 px-4 py-2 text-sm font-semibold uppercase tracking-wider text-gold-400 transition hover:bg-gold-600/30"
-        >
-          Registrar cliente
-        </Link>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Clientes"
+        description="Directorio del local: contacto e historial de cada cliente."
+        actions={
+          <Button as={Link} to="/clientes/nuevo">
+            Registrar cliente
+          </Button>
+        }
+      />
 
-      <form onSubmit={handleSearchSubmit} className="mb-4 flex gap-2">
-        <input
-          type="text"
-          placeholder="Buscar por nombre, telefono o correo"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          className="w-full max-w-sm rounded-lg border border-neutral-700/50 bg-[#1a1a1a] px-3 py-2 text-sm text-white placeholder-neutral-600 outline-none transition focus:border-gold-500/60 focus:ring-1 focus:ring-gold-500/20"
+      {loading && <LoadingState label="Cargando los clientes" className="surface-card" />}
+
+      {!loading && falloDeCarga && (
+        <ErrorState
+          title="No pudimos cargar los clientes"
+          message="El listado no aparece en pantalla. Vuelve a intentarlo en un momento."
+          onRetry={() => loadClients(search, pagination.page)}
+          className="surface-card"
         />
-        <button
-          type="submit"
-          className="rounded-lg border border-neutral-700/50 px-4 py-2 text-sm font-medium text-neutral-400 transition hover:border-gold-600/40 hover:text-gold-400"
-        >
-          Buscar
-        </button>
-      </form>
-
-      {error && (
-        <p className="mb-4 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm text-red-400">
-          {error}
-        </p>
       )}
 
-      {loading ? (
-        <p className="text-sm text-neutral-500">Cargando...</p>
-      ) : clients.length === 0 ? (
-        <p className="text-sm text-neutral-500">No se encontraron clientes.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-gold-800/20 text-neutral-500">
-                <th className="py-2.5 pr-4 font-medium">Nombre</th>
-                <th className="py-2.5 pr-4 font-medium">Telefono</th>
-                <th className="py-2.5 pr-4 font-medium">Correo</th>
-                <th className="py-2.5 pr-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((client) => (
-                <tr key={client.id} className="border-b border-neutral-800/40">
-                  <td className="py-2.5 pr-4 font-medium text-neutral-200">{client.nombre}</td>
-                  <td className="py-2.5 pr-4 text-neutral-400">{client.telefono}</td>
-                  <td className="py-2.5 pr-4 text-neutral-400">{client.email || '—'}</td>
-                  <td className="py-2.5 pr-4 text-right">
-                    <div className="flex justify-end gap-3">
-                      <Link to={`/clientes/${client.id}`} className="text-gold-400 hover:text-gold-300">
-                        Ver
-                      </Link>
-                      <Link to={`/clientes/${client.id}/editar`} className="text-gold-400 hover:text-gold-300">
-                        Editar
-                      </Link>
-                      <button type="button" onClick={() => handleDelete(client.id)} className="text-red-400 hover:text-red-300">
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Pagination
-            page={pagination.page}
-            totalPages={pagination.totalPages}
-            total={pagination.total}
-            onPageChange={handlePageChange}
-          />
-        </div>
+      {!loading && !falloDeCarga && (
+        <Card padding="none">
+          <div className="border-b border-line px-5 py-4">
+            <form onSubmit={handleSearchSubmit} className="flex flex-wrap items-end gap-2">
+              <Field
+                label="Buscar clientes"
+                htmlFor="buscar-clientes"
+                className="min-w-0 flex-1 basis-56"
+              >
+                <Input
+                  id="buscar-clientes"
+                  type="search"
+                  placeholder="Nombre, teléfono o correo"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+              </Field>
+
+              <Button type="submit" variant="secondary">
+                Buscar
+              </Button>
+            </form>
+          </div>
+
+          {error && (
+            <p
+              role="alert"
+              className="mx-5 mt-4 rounded-field border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+            >
+              {error}
+            </p>
+          )}
+
+          {clients.length === 0 ? (
+            <EmptyState
+              icon={<UsersIcon className="h-5 w-5" />}
+              title="Todavía no hay clientes registrados"
+              description="Registrar el primer cliente es lo que habilita agendar citas a su nombre."
+              action={
+                <Button as={Link} to="/clientes/nuevo" variant="secondary">
+                  Registrar cliente
+                </Button>
+              }
+            />
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-line">
+                      <th scope="col" className={TH}>
+                        Nombre
+                      </th>
+                      <th scope="col" className={TH}>
+                        Teléfono
+                      </th>
+                      <th scope="col" className={TH}>
+                        Correo
+                      </th>
+                      <th scope="col" className={`${TH} text-right`}>
+                        <span className="sr-only">Acciones</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clients.map((client) => (
+                      <tr
+                        key={client.id}
+                        className="border-b border-line transition-colors duration-(--duration-fast) last:border-b-0 hover:bg-surface-sunken/70"
+                      >
+                        <td className="px-5 py-3 font-medium text-ink">{client.nombre}</td>
+                        <td className="px-5 py-3 tabular text-ink-muted">{client.telefono}</td>
+                        <td className="px-5 py-3 text-ink-muted">{client.email || '—'}</td>
+                        <td className="py-1 pr-4 pl-5 text-right">
+                          {/*
+                            Cada acción mide 44px de alto: en un celular, en el local, con las
+                            manos ocupadas, un enlace de 20px es un enlace al que no se le
+                            acierta. El padding horizontal las separa sin encoger el target.
+                          */}
+                          <div className="flex items-center justify-end">
+                            <Link
+                              to={`/clientes/${client.id}`}
+                              className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-brand hover:text-brand-deep"
+                            >
+                              Ver
+                            </Link>
+                            <Link
+                              to={`/clientes/${client.id}/editar`}
+                              className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-brand hover:text-brand-deep"
+                            >
+                              Editar
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(client.id)}
+                              className="inline-flex min-h-11 cursor-pointer items-center px-2 text-sm font-medium text-danger hover:underline"
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <Pagination
+                page={pagination.page}
+                totalPages={pagination.totalPages}
+                total={pagination.total}
+                onPageChange={handlePageChange}
+              />
+            </>
+          )}
+        </Card>
       )}
     </div>
   );

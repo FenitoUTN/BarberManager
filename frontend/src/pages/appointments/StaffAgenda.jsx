@@ -4,18 +4,40 @@ import EstadoBadge, { ESTADO_LABELS } from '../../components/EstadoBadge';
 import BookingForm from './BookingForm';
 import Pagination from '../../components/Pagination';
 import { formatDate, formatPrice, formatTime, todayISO } from '../../utils/format';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import ErrorState from '../../components/ui/ErrorState';
+import Field from '../../components/ui/Field';
+import Input from '../../components/ui/Input';
+import LoadingState from '../../components/ui/LoadingState';
+import PageHeader from '../../components/ui/PageHeader';
+import Select from '../../components/ui/Select';
 
 const PAGE_SIZE = 20;
 
-function TabButton({ active, onClick, children }) {
+/*
+ * Pestañas de la agenda. El cambio de contenido no navega, así que esto es un tablist de
+ * verdad: `aria-selected` le dice al lector de pantalla cuál se está viendo y `aria-controls`
+ * a dónde apunta. Sólo con color, alguien con baja visión ve tres etiquetas y no sabe cuál
+ * está activa.
+ *
+ * El filo activo va con `-mb-px` para pisar la línea del contenedor: sin eso hay dos bordes
+ * apilados de 1px y la pestaña activa queda desalineada.
+ */
+function TabButton({ id, active, onClick, children }) {
   return (
     <button
+      id={`tab-${id}`}
       type="button"
+      role="tab"
+      aria-selected={active}
+      aria-controls={`panel-${id}`}
       onClick={onClick}
-      className={`border-b-2 px-1 pb-3 text-sm font-medium transition ${
+      className={`-mb-px min-h-11 border-b-2 px-1 text-sm font-medium transition-[border-color,color] duration-(--duration-fast) ease-out ${
         active
-          ? 'border-gold-500 text-gold-400'
-          : 'border-transparent text-neutral-500 hover:text-neutral-300'
+          ? 'border-brand font-semibold text-brand'
+          : 'border-transparent text-ink-muted hover:text-ink'
       }`}
     >
       {children}
@@ -23,24 +45,7 @@ function TabButton({ active, onClick, children }) {
   );
 }
 
-function ActionButton({ onClick, disabled, tone, children }) {
-  const tones = {
-    orange: 'border-gold-500/40 text-gold-400 hover:bg-gold-500/10',
-    emerald: 'border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10',
-    red: 'border-red-500/40 text-red-400 hover:bg-red-500/10',
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone]}`}
-    >
-      {children}
-    </button>
-  );
-}
+const TH = 'px-5 py-3 text-left text-xs font-medium text-ink-subtle';
 
 function TodayAgenda() {
   const [fecha, setFecha] = useState(todayISO());
@@ -80,92 +85,108 @@ function TodayAgenda() {
     }
   }
 
+  const falloDeCarga = Boolean(error) && citas.length === 0;
+
   return (
     <div className="space-y-4">
-      <div>
-        <label htmlFor="fecha-agenda" className="mb-1.5 block text-sm font-medium text-neutral-300">
-          Fecha
-        </label>
-        <input
+      <Field label="Fecha" htmlFor="fecha-agenda" className="w-full sm:w-56">
+        <Input
           id="fecha-agenda"
           type="date"
           value={fecha}
           onChange={(event) => setFecha(event.target.value)}
-          className="w-full max-w-xs rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
         />
-      </div>
+      </Field>
 
-      {error && (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+      {error && !falloDeCarga && (
+        <p
+          role="alert"
+          className="rounded-field border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+        >
           {error}
         </p>
       )}
 
-      {loading ? (
-        <p className="text-sm text-neutral-500">Cargando...</p>
-      ) : citas.length === 0 ? (
-        <p className="text-sm text-neutral-500">No hay citas para este día.</p>
-      ) : (
-        <div className="space-y-3">
+      {loading && <LoadingState label="Cargando la agenda del día" />}
+
+      {!loading && falloDeCarga && (
+        <ErrorState
+          title="No pudimos cargar la agenda"
+          message="Las citas de ese día no aparecen en pantalla. Vuelve a intentarlo en un momento."
+          onRetry={load}
+        />
+      )}
+
+      {!loading && !falloDeCarga && citas.length === 0 && (
+        <EmptyState
+          title="No hay citas para este día"
+          description="Cambiá la fecha de arriba, o reservá una nueva en la pestaña Nueva cita."
+        />
+      )}
+
+      {!loading && !falloDeCarga && citas.length > 0 && (
+        <ul className="divide-y divide-line">
           {citas.map((cita) => (
-            <div
+            <li
               key={cita.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-950 p-4"
+              className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 py-4 first:pt-0 last:pb-0"
             >
-              <div>
-                <p className="text-sm font-semibold text-neutral-100">
-                  {formatTime(cita.hora_inicio)} - {formatTime(cita.hora_fin)} · {cita.servicio_nombre}
+              <div className="min-w-0">
+                <p className="text-base font-medium tabular text-ink">
+                  {formatTime(cita.hora_inicio)} - {formatTime(cita.hora_fin)} ·{' '}
+                  {cita.servicio_nombre}
                 </p>
-                <p className="text-sm text-neutral-400">
-                  {cita.cliente_nombre} · {cita.cliente_telefono}
+                <p className="mt-0.5 text-sm text-ink-muted">
+                  {cita.cliente_nombre} · <span className="tabular">{cita.cliente_telefono}</span>
                 </p>
-                {cita.notas && <p className="mt-1 text-xs text-neutral-500">{cita.notas}</p>}
+                {cita.notas && <p className="mt-1 text-xs text-ink-muted">{cita.notas}</p>}
               </div>
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-gold-500">
+
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="mr-1 text-sm font-semibold tabular text-ink">
                   {formatPrice(cita.servicio_precio)}
                 </p>
                 <EstadoBadge estado={cita.estado} />
+
                 {cita.estado === 'pendiente' && (
                   <>
-                    <ActionButton
-                      tone="emerald"
+                    <Button
                       disabled={updatingId === cita.id}
                       onClick={() => handleEstado(cita.id, 'confirmada')}
                     >
                       Confirmar
-                    </ActionButton>
-                    <ActionButton
-                      tone="red"
+                    </Button>
+                    <Button
+                      variant="dangerGhost"
                       disabled={updatingId === cita.id}
                       onClick={() => handleEstado(cita.id, 'cancelada')}
                     >
                       Cancelar
-                    </ActionButton>
+                    </Button>
                   </>
                 )}
+
                 {cita.estado === 'confirmada' && (
                   <>
-                    <ActionButton
-                      tone="emerald"
+                    <Button
                       disabled={updatingId === cita.id}
                       onClick={() => handleEstado(cita.id, 'completada')}
                     >
                       Completar
-                    </ActionButton>
-                    <ActionButton
-                      tone="red"
+                    </Button>
+                    <Button
+                      variant="dangerGhost"
                       disabled={updatingId === cita.id}
                       onClick={() => handleEstado(cita.id, 'cancelada')}
                     >
                       Cancelar
-                    </ActionButton>
+                    </Button>
                   </>
                 )}
               </div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
@@ -208,45 +229,37 @@ function History() {
     search(1);
   }
 
+  const falloDeCarga = Boolean(error) && !searched;
+
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
-        <div>
-          <label htmlFor="desde" className="mb-1.5 block text-sm font-medium text-neutral-300">
-            Desde
-          </label>
-          <input
+        <Field label="Desde" htmlFor="desde" className="w-full sm:w-44">
+          <Input
             id="desde"
             name="desde"
             type="date"
             value={filters.desde}
             onChange={handleChange}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
-        </div>
-        <div>
-          <label htmlFor="hasta" className="mb-1.5 block text-sm font-medium text-neutral-300">
-            Hasta
-          </label>
-          <input
+        </Field>
+
+        <Field label="Hasta" htmlFor="hasta" className="w-full sm:w-44">
+          <Input
             id="hasta"
             name="hasta"
             type="date"
             value={filters.hasta}
             onChange={handleChange}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
-        </div>
-        <div>
-          <label htmlFor="estado" className="mb-1.5 block text-sm font-medium text-neutral-300">
-            Estado
-          </label>
-          <select
+        </Field>
+
+        <Field label="Estado" htmlFor="estado" className="w-full sm:w-48">
+          <Select
             id="estado"
             name="estado"
             value={filters.estado}
             onChange={handleChange}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           >
             <option value="">Todos</option>
             {Object.entries(ESTADO_LABELS).map(([value, label]) => (
@@ -254,63 +267,99 @@ function History() {
                 {label}
               </option>
             ))}
-          </select>
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-lg bg-gold-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:opacity-50"
-        >
-          {loading ? 'Buscando...' : 'Buscar'}
-        </button>
+          </Select>
+        </Field>
+
+        <Button type="submit" loading={loading}>
+          Buscar
+        </Button>
       </form>
 
-      {error && (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+      {error && !falloDeCarga && (
+        <p
+          role="alert"
+          className="rounded-field border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+        >
           {error}
         </p>
       )}
 
-      {!loading && searched && (
+      {!loading && falloDeCarga && (
+        <ErrorState
+          title="No pudimos cargar el historial"
+          message="La búsqueda no se pudo completar. Vuelve a intentarlo en un momento."
+          onRetry={() => search(1)}
+        />
+      )}
+
+      {!loading && !falloDeCarga && searched && (
         citas.length === 0 ? (
-          <p className="text-sm text-neutral-500">No se encontraron citas con esos filtros.</p>
+          <Card padding="none">
+            <EmptyState
+              title="No se encontraron citas con esos filtros"
+              description="Ampliá el rango de fechas o quitá el filtro de estado."
+            />
+          </Card>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-neutral-800 text-neutral-500">
-                  <th className="py-2 pr-4 font-medium">Fecha</th>
-                  <th className="py-2 pr-4 font-medium">Hora</th>
-                  <th className="py-2 pr-4 font-medium">Cliente</th>
-                  <th className="py-2 pr-4 font-medium">Servicio</th>
-                  <th className="py-2 pr-4 font-medium">Precio</th>
-                  <th className="py-2 pr-4 font-medium">Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {citas.map((cita) => (
-                  <tr key={cita.id} className="border-b border-neutral-800/60">
-                    <td className="py-2 pr-4 text-neutral-100">{formatDate(cita.fecha)}</td>
-                    <td className="py-2 pr-4 text-neutral-400">
-                      {formatTime(cita.hora_inicio)} - {formatTime(cita.hora_fin)}
-                    </td>
-                    <td className="py-2 pr-4 text-neutral-100">{cita.cliente_nombre}</td>
-                    <td className="py-2 pr-4 text-neutral-400">{cita.servicio_nombre}</td>
-                    <td className="py-2 pr-4 text-gold-500">{formatPrice(cita.servicio_precio)}</td>
-                    <td className="py-2 pr-4">
-                      <EstadoBadge estado={cita.estado} />
-                    </td>
+          // Tarjeta propia para que la paginación quede al pie del bloque y no flotando en
+          // el aire: su separador superior es un borde de la tarjeta, no una línea suelta.
+          // Va fuera del `overflow-x-auto`, así el pie no se desplaza con las columnas.
+          <Card padding="none">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-line">
+                    <th scope="col" className={TH}>
+                      Fecha
+                    </th>
+                    <th scope="col" className={TH}>
+                      Hora
+                    </th>
+                    <th scope="col" className={TH}>
+                      Cliente
+                    </th>
+                    <th scope="col" className={TH}>
+                      Servicio
+                    </th>
+                    <th scope="col" className={TH}>
+                      Precio
+                    </th>
+                    <th scope="col" className={TH}>
+                      Estado
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {citas.map((cita) => (
+                    <tr
+                      key={cita.id}
+                      className="border-b border-line transition-colors duration-(--duration-fast) last:border-b-0 hover:bg-surface-sunken/70"
+                    >
+                      <td className="px-5 py-3 tabular text-ink">{formatDate(cita.fecha)}</td>
+                      <td className="px-5 py-3 tabular text-ink-muted">
+                        {formatTime(cita.hora_inicio)} - {formatTime(cita.hora_fin)}
+                      </td>
+                      <td className="px-5 py-3 font-medium text-ink">{cita.cliente_nombre}</td>
+                      <td className="px-5 py-3 text-ink-muted">{cita.servicio_nombre}</td>
+                      <td className="px-5 py-3 font-semibold tabular text-ink">
+                        {formatPrice(cita.servicio_precio)}
+                      </td>
+                      <td className="px-5 py-3">
+                        <EstadoBadge estado={cita.estado} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
             <Pagination
               page={pagination.page}
               totalPages={pagination.totalPages}
               total={pagination.total}
               onPageChange={search}
             />
-          </div>
+          </Card>
         )
       )}
     </div>
@@ -321,27 +370,47 @@ function StaffAgenda() {
   const [tab, setTab] = useState('hoy');
 
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-      <h2 className="mb-1 font-serif text-2xl tracking-wide text-gold-400">Agenda</h2>
-      <p className="mb-4 text-sm text-neutral-400">
-        Gestioná las citas del día, el historial y nuevas reservas.
-      </p>
+    <div className="space-y-6">
+      <PageHeader
+        title="Agenda"
+        description="Gestioná las citas del día, el historial y nuevas reservas."
+      />
 
-      <div className="mb-6 flex gap-6 border-b border-neutral-800">
-        <TabButton active={tab === 'hoy'} onClick={() => setTab('hoy')}>
-          Agenda del día
-        </TabButton>
-        <TabButton active={tab === 'historial'} onClick={() => setTab('historial')}>
-          Historial
-        </TabButton>
-        <TabButton active={tab === 'nueva'} onClick={() => setTab('nueva')}>
-          Nueva cita
-        </TabButton>
-      </div>
+      <Card padding="none">
+        <div
+          role="tablist"
+          aria-label="Secciones de la agenda"
+          className="flex flex-wrap gap-6 border-b border-line px-5 pt-2"
+        >
+          <TabButton id="hoy" active={tab === 'hoy'} onClick={() => setTab('hoy')}>
+            Agenda del día
+          </TabButton>
+          <TabButton id="historial" active={tab === 'historial'} onClick={() => setTab('historial')}>
+            Historial
+          </TabButton>
+          <TabButton id="nueva" active={tab === 'nueva'} onClick={() => setTab('nueva')}>
+            Nueva cita
+          </TabButton>
+        </div>
 
-      {tab === 'hoy' && <TodayAgenda />}
-      {tab === 'historial' && <History />}
-      {tab === 'nueva' && <BookingForm showClientSelect onBooked={() => setTab('hoy')} />}
+        <div className="p-5">
+          {tab === 'hoy' && (
+            <div role="tabpanel" id="panel-hoy" aria-labelledby="tab-hoy">
+              <TodayAgenda />
+            </div>
+          )}
+          {tab === 'historial' && (
+            <div role="tabpanel" id="panel-historial" aria-labelledby="tab-historial">
+              <History />
+            </div>
+          )}
+          {tab === 'nueva' && (
+            <div role="tabpanel" id="panel-nueva" aria-labelledby="tab-nueva">
+              <BookingForm showClientSelect onBooked={() => setTab('hoy')} />
+            </div>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

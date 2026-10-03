@@ -3,29 +3,17 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { addAbono, getApartado } from '../../api/apartados';
 import { formatPrice, formatDate } from '../../utils/format';
+import ApartadoBadge from '../../components/ApartadoBadge';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import ErrorState from '../../components/ui/ErrorState';
+import Field from '../../components/ui/Field';
+import Input from '../../components/ui/Input';
+import LoadingState from '../../components/ui/LoadingState';
+import PageHeader from '../../components/ui/PageHeader';
 
-const ESTADO_LABELS = {
-  activo: 'Activo',
-  pagado: 'Pagado',
-  cancelado: 'Cancelado',
-};
-
-const ESTADO_STYLES = {
-  activo: 'border-gold-500/30 bg-gold-500/10 text-gold-400',
-  pagado: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  cancelado: 'border-red-500/30 bg-red-500/10 text-red-400',
-};
-
-function ApartadoBadge({ estado }) {
-  const style = ESTADO_STYLES[estado] || 'border-neutral-700 bg-neutral-800 text-neutral-400';
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap ${style}`}
-    >
-      {ESTADO_LABELS[estado] || estado}
-    </span>
-  );
-}
+const TH = 'px-5 py-3 text-left text-xs font-medium text-ink-subtle';
 
 function ApartadoDetail() {
   const { id } = useParams();
@@ -36,6 +24,8 @@ function ApartadoDetail() {
   const [abonos, setAbonos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // Reintento de la carga inicial: sin contador el efecto no vuelve a dispararse.
+  const [intento, setIntento] = useState(0);
 
   const [monto, setMonto] = useState('');
   const [abonoError, setAbonoError] = useState('');
@@ -59,7 +49,7 @@ function ApartadoDetail() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadApartado();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, intento]);
 
   async function handleAddAbono(event) {
     event.preventDefault();
@@ -84,121 +74,176 @@ function ApartadoDetail() {
   }
 
   if (loading) {
-    return <p className="text-sm text-neutral-500">Cargando...</p>;
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Apartado" />
+        <LoadingState label="Cargando el apartado" className="surface-card" />
+      </div>
+    );
   }
 
-  if (error || !apartado) {
+  // Un id que no existe no es un error de red: reintentar devuelve lo mismo.
+  if (!loading && !error && !apartado) {
     return (
-      <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
-        {error || 'Apartado no encontrado'}
-      </p>
+      <div className="space-y-6">
+        <PageHeader title="Apartado" />
+        <Card padding="none">
+          <EmptyState
+            title="Ese apartado no existe"
+            description="Puede que se haya eliminado mientras tenías esta pestaña abierta."
+            action={
+              <Button as={Link} to="/apartados" variant="secondary">
+                Volver a apartados
+              </Button>
+            }
+          />
+        </Card>
+      </div>
+    );
+  }
+
+  if (!loading && error && !apartado) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Apartado" />
+        <ErrorState
+          title="No pudimos cargar el apartado"
+          message="El detalle no aparece en pantalla. Vuelve a intentarlo en un momento."
+          onRetry={() => setIntento((n) => n + 1)}
+          className="surface-card"
+        />
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <Link to="/apartados" className="text-sm text-gold-500 hover:text-gold-400">
-              ← Volver a apartados
-            </Link>
-            <h2 className="mt-1 font-serif text-2xl tracking-wide text-gold-400">{apartado.producto_nombre}</h2>
-          </div>
-          <ApartadoBadge estado={apartado.estado} />
-        </div>
+      <div>
+        <Link
+          to="/apartados"
+          className="inline-flex min-h-11 items-center text-sm font-medium text-brand underline decoration-brand-line underline-offset-4 transition-colors duration-(--duration-fast) ease-out hover:text-brand-deep hover:decoration-brand"
+        >
+          Volver a apartados
+        </Link>
 
+        <PageHeader
+          title={apartado.producto_nombre}
+          description={
+            isStaff ? `Cliente: ${apartado.cliente_nombre}` : 'Tu apartado y su saldo.'
+          }
+          actions={<ApartadoBadge estado={apartado.estado} />}
+        />
+      </div>
+
+      <Card>
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {isStaff && (
             <div>
-              <dt className="text-xs uppercase tracking-wide text-neutral-500">Cliente</dt>
-              <dd className="text-sm font-medium text-neutral-100">{apartado.cliente_nombre}</dd>
+              <dt className="text-xs text-ink-subtle">Cliente</dt>
+              <dd className="mt-0.5 text-sm font-medium text-ink">{apartado.cliente_nombre}</dd>
             </div>
           )}
           <div>
-            <dt className="text-xs uppercase tracking-wide text-neutral-500">Monto total</dt>
-            <dd className="text-sm font-medium text-neutral-100">
+            <dt className="text-xs text-ink-subtle">Monto total</dt>
+            <dd className="mt-0.5 text-sm font-medium tabular text-ink">
               {formatPrice(apartado.monto_total)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-neutral-500">Saldo pendiente</dt>
-            <dd className="text-lg font-bold text-gold-500">
+            <dt className="text-xs text-ink-subtle">Saldo pendiente</dt>
+            <dd className="mt-0.5 text-xl font-semibold tabular text-ink">
               {formatPrice(apartado.saldo_pendiente)}
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-neutral-500">Fecha de registro</dt>
-            <dd className="text-sm font-medium text-neutral-100">
+            <dt className="text-xs text-ink-subtle">Fecha de registro</dt>
+            <dd className="mt-0.5 text-sm font-medium tabular text-ink">
               {formatDate(apartado.created_at.slice(0, 10))}
             </dd>
           </div>
         </dl>
-      </div>
+      </Card>
 
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h3 className="mb-4 font-serif text-xl tracking-wide text-gold-400">Historial de abonos</h3>
+      <section aria-labelledby="titulo-abonos">
+        <Card>
+          <h2 id="titulo-abonos" className="font-display text-lg text-ink">
+            Historial de abonos
+          </h2>
 
-        {abonos.length === 0 ? (
-          <p className="text-sm text-neutral-500">Aún no se han registrado abonos.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-neutral-800 text-neutral-500">
-                  <th className="py-2 pr-4 font-medium">Fecha</th>
-                  <th className="py-2 pr-4 font-medium">Monto</th>
-                </tr>
-              </thead>
-              <tbody>
-                {abonos.map((abono) => (
-                  <tr key={abono.id} className="border-b border-neutral-800/60">
-                    <td className="py-2 pr-4 text-neutral-400">{formatDate(abono.fecha)}</td>
-                    <td className="py-2 pr-4 font-medium text-neutral-100">
-                      {formatPrice(abono.monto)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {isStaff && apartado.estado === 'activo' && (
-          <form onSubmit={handleAddAbono} className="mt-6 flex flex-wrap items-end gap-3">
-            <div>
-              <label htmlFor="monto" className="mb-1.5 block text-sm font-medium text-neutral-300">
-                Registrar abono (₡)
-              </label>
-              <input
-                id="monto"
-                name="monto"
-                type="number"
-                min="0.01"
-                max={apartado.saldo_pendiente}
-                step="0.01"
-                required
-                value={monto}
-                onChange={(event) => setMonto(event.target.value)}
-                className="w-48 rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
+          <div className="mt-4">
+            {abonos.length === 0 ? (
+              <EmptyState
+                title="Todavía no hay abonos"
+                description={
+                  isStaff
+                    ? 'Cada abono que registres queda anotado acá, con su fecha.'
+                    : 'Cuando hagas un abono queda anotado acá, con su fecha.'
+                }
               />
-            </div>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="rounded-lg bg-gold-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {submitting ? 'Guardando...' : 'Registrar abono'}
-            </button>
-          </form>
-        )}
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <caption className="sr-only">Abonos registrados, con fecha y monto.</caption>
+                  <thead>
+                    <tr className="border-b border-line">
+                      <th scope="col" className={TH}>
+                        Fecha
+                      </th>
+                      <th scope="col" className={`${TH} text-right`}>
+                        Monto
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {abonos.map((abono) => (
+                      <tr
+                        key={abono.id}
+                        className="border-b border-line transition-colors duration-(--duration-fast) last:border-b-0 hover:bg-surface-sunken/70"
+                      >
+                        <td className="px-5 py-3 tabular text-ink-muted">{formatDate(abono.fecha)}</td>
+                        <td className="px-5 py-3 text-right font-medium tabular text-ink">
+                          {formatPrice(abono.monto)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
 
-        {abonoError && (
-          <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
-            {abonoError}
-          </p>
-        )}
-      </div>
+          {isStaff && apartado.estado === 'activo' && (
+            <form onSubmit={handleAddAbono} className="mt-6 flex flex-wrap items-end gap-3">
+              <Field label="Registrar abono (₡)" htmlFor="monto" className="w-full sm:w-48">
+                <Input
+                  id="monto"
+                  name="monto"
+                  type="number"
+                  min="0.01"
+                  max={apartado.saldo_pendiente}
+                  step="0.01"
+                  required
+                  value={monto}
+                  onChange={(event) => setMonto(event.target.value)}
+                />
+              </Field>
+
+              <Button type="submit" loading={submitting}>
+                Registrar abono
+              </Button>
+            </form>
+          )}
+
+          {abonoError && (
+            <p
+              role="alert"
+              className="mt-3 rounded-field border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+            >
+              {abonoError}
+            </p>
+          )}
+        </Card>
+      </section>
     </div>
   );
 }

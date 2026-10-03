@@ -3,21 +3,39 @@ import { cancelAppointment, getMyAppointments } from '../../api/appointments';
 import EstadoBadge from '../../components/EstadoBadge';
 import BookingForm from './BookingForm';
 import { formatDate, formatPrice, formatTime } from '../../utils/format';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import LoadingState from '../../components/ui/LoadingState';
+import PageHeader from '../../components/ui/PageHeader';
 
 function canCancel(cita) {
   if (!['pendiente', 'confirmada'].includes(cita.estado)) return false;
   return new Date(`${cita.fecha}T${cita.hora_inicio}`) > new Date();
 }
 
-function TabButton({ active, onClick, children }) {
+/*
+ * Pestañas de la vista. El cambio de contenido no navega, así que esto es un tablist de
+ * verdad: `aria-selected` le dice al lector de pantalla cuál está viendo y `aria-controls`
+ * a dónde va. Sólo con color, alguien con baja visión ve dos etiquetas grises y no sabe
+ * cuál está activa.
+ *
+ * El filo activo va con `-mb-px` para pisar la línea del contenedor: sin eso hay dos
+ * bordes apilados de 1px y la pestaña activa parece desalineada.
+ */
+function TabButton({ id, active, onClick, children }) {
   return (
     <button
+      id={`tab-${id}`}
       type="button"
+      role="tab"
+      aria-selected={active}
+      aria-controls={`panel-${id}`}
       onClick={onClick}
-      className={`border-b-2 px-1 pb-3 text-sm font-medium transition ${
+      className={`-mb-px min-h-11 border-b-2 px-1 text-sm font-medium transition-[border-color,color] duration-(--duration-fast) ease-out ${
         active
-          ? 'border-gold-500 text-gold-400'
-          : 'border-transparent text-neutral-500 hover:text-neutral-300'
+          ? 'border-brand font-semibold text-brand'
+          : 'border-transparent text-ink-muted hover:text-ink'
       }`}
     >
       {children}
@@ -64,50 +82,60 @@ function MyAppointments() {
   }
 
   if (loading) {
-    return <p className="text-sm text-neutral-500">Cargando...</p>;
+    return <LoadingState label="Cargando tus citas" />;
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {error && (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+        <p
+          role="alert"
+          className="rounded-field border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+        >
           {error}
         </p>
       )}
 
-      {citas.length === 0 ? (
-        <p className="text-sm text-neutral-500">Todavía no tenés citas reservadas.</p>
+      {citas.length === 0 && !error ? (
+        <EmptyState
+          title="Todavía no tenés citas reservadas"
+          description="Elegí servicio, día y horario en la pestaña de arriba, y el turno queda reservado."
+        />
       ) : (
-        citas.map((cita) => (
-          <div
-            key={cita.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-950 p-4"
-          >
-            <div>
-              <p className="text-sm font-semibold text-neutral-100">{cita.servicio_nombre}</p>
-              <p className="text-sm text-neutral-400">
-                {formatDate(cita.fecha)} · {formatTime(cita.hora_inicio)} - {formatTime(cita.hora_fin)}
-              </p>
-              {cita.notas && <p className="mt-1 text-xs text-neutral-500">{cita.notas}</p>}
-            </div>
-            <div className="flex items-center gap-3">
-              <p className="text-sm font-semibold text-gold-500">
-                {formatPrice(cita.servicio_precio)}
-              </p>
-              <EstadoBadge estado={cita.estado} />
-              {canCancel(cita) && (
-                <button
-                  type="button"
-                  onClick={() => handleCancel(cita.id)}
-                  disabled={cancelingId === cita.id}
-                  className="text-sm text-red-400 hover:text-red-300 disabled:opacity-50"
-                >
-                  {cancelingId === cita.id ? 'Cancelando...' : 'Cancelar'}
-                </button>
-              )}
-            </div>
-          </div>
-        ))
+        <ul className="divide-y divide-line">
+          {citas.map((cita) => (
+            <li
+              key={cita.id}
+              className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 py-4 first:pt-0 last:pb-0"
+            >
+              <div className="min-w-0">
+                <p className="text-base font-medium text-ink">{cita.servicio_nombre}</p>
+                <p className="mt-0.5 text-sm tabular text-ink-muted">
+                  {formatDate(cita.fecha)} · {formatTime(cita.hora_inicio)} -{' '}
+                  {formatTime(cita.hora_fin)}
+                </p>
+                {cita.notas && <p className="mt-1 text-xs text-ink-muted">{cita.notas}</p>}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm font-semibold tabular text-ink">
+                  {formatPrice(cita.servicio_precio)}
+                </p>
+                <EstadoBadge estado={cita.estado} />
+
+                {canCancel(cita) && (
+                  <Button
+                    variant="dangerGhost"
+                    loading={cancelingId === cita.id}
+                    onClick={() => handleCancel(cita.id)}
+                  >
+                    Cancelar
+                  </Button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
@@ -117,24 +145,38 @@ function ClientAgenda() {
   const [tab, setTab] = useState('reservar');
 
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-      <h2 className="mb-1 font-serif text-2xl tracking-wide text-gold-400">Agenda</h2>
-      <p className="mb-4 text-sm text-neutral-400">Reservá tu turno o revisá tus citas.</p>
+    <div className="space-y-6">
+      <PageHeader
+        title="Agenda"
+        description="Reservá tu turno o revisá las citas que ya tenés."
+      />
 
-      <div className="mb-6 flex gap-6 border-b border-neutral-800">
-        <TabButton active={tab === 'reservar'} onClick={() => setTab('reservar')}>
-          Reservar turno
-        </TabButton>
-        <TabButton active={tab === 'mis-citas'} onClick={() => setTab('mis-citas')}>
-          Mis citas
-        </TabButton>
-      </div>
+      <Card padding="none">
+        <div
+          role="tablist"
+          aria-label="Secciones de la agenda"
+          className="flex gap-6 border-b border-line px-5 pt-2"
+        >
+          <TabButton id="reservar" active={tab === 'reservar'} onClick={() => setTab('reservar')}>
+            Reservar turno
+          </TabButton>
+          <TabButton id="mis-citas" active={tab === 'mis-citas'} onClick={() => setTab('mis-citas')}>
+            Mis citas
+          </TabButton>
+        </div>
 
-      {tab === 'reservar' ? (
-        <BookingForm onViewAppointments={() => setTab('mis-citas')} />
-      ) : (
-        <MyAppointments />
-      )}
+        <div className="p-5">
+          {tab === 'reservar' ? (
+            <div role="tabpanel" id="panel-reservar" aria-labelledby="tab-reservar">
+              <BookingForm onViewAppointments={() => setTab('mis-citas')} />
+            </div>
+          ) : (
+            <div role="tabpanel" id="panel-mis-citas" aria-labelledby="tab-mis-citas">
+              <MyAppointments />
+            </div>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

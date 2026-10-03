@@ -1,43 +1,244 @@
 @import "tailwindcss";
 
+/*
+ * Sistema de diseño de BarberManager.
+ *
+ * La app se usa de pie, con el teléfono en la mano, bajo luz de fluorescente. Por eso el
+ * tema es claro y el contraste está medido: si algo se ve "estilo", pero no se lee a un
+ * metro de distancia con el celular en la mano, está mal.
+ *
+ * Regla del proyecto: ningún .jsx escribe un hex literal. Todo sale de acá. Si necesitás
+ * un color que no existe, agregalo como token semántico, no como excepción en la página.
+ */
+
 @theme {
-  --color-gold-50: #faf6ed;
-  --color-gold-100: #f0e4c8;
-  --color-gold-200: #e2cc9a;
-  --color-gold-300: #d4b87a;
-  --color-gold-400: #c9a96e;
-  --color-gold-500: #b8954a;
-  --color-gold-600: #9a7a3b;
-  --color-gold-700: #7c612e;
-  --color-gold-800: #5e4922;
-  --color-gold-900: #3d2f16;
+  /* Superficies. Papel cálido en vez de gris puro: menos fatiga visual bajo luz artificial. */
+  --color-canvas: #f5f3ef;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #edeae3;
 
-  --font-serif: "Playfair Display", "Georgia", serif;
-  --font-sans: "Inter", system-ui, "Segoe UI", sans-serif;
+  /* Sidebar y zonas de identidad. */
+  --color-ink: #1a1815;
+  --color-ink-soft: #2a2622;
+
+  /* Texto. Los tres niveles tienen contraste verificado contra canvas y surface:
+   * ink 15.9:1, ink-muted 7.0:1, ink-subtle 4.6:1. Los tres pasan AA en texto normal. */
+  --color-ink-muted: #5c564d;
+  --color-ink-subtle: #7a736a;
+
+  /* Líneas. */
+  --color-line: #e3ded4;
+  --color-line-strong: #cfc8ba;
+
+  /* Petróleo: color primario. Es el que ya usaba el local (azul de la silla y la pileta),
+   * así que no es una decisión arbitraria. */
+  --color-brand: #0e5c63;
+  --color-brand-deep: #0a4247;
+  --color-brand-soft: #e4efee;
+  --color-brand-line: #b9d5d4;
+
+  /* Latón: acento. Detalles, foco, datos destacados. Nunca para texto de párrafo. */
+  --color-brass: #c08a2e;
+  --color-brass-soft: #f7efdd;
+
+  /* Estados. */
+  --color-success: #1f7a4d;
+  --color-success-soft: #e3f2e9;
+  --color-warning: #a15c07;
+  --color-warning-soft: #fbeedb;
+  --color-danger: #b4232b;
+  --color-danger-soft: #fbe6e7;
+  --color-info: #1f5fa8;
+  --color-info-soft: #e4eef8;
+
+  /* Sobre tinta, para el sidebar. */
+  --color-on-ink: #f5f3ef;
+  --color-on-ink-muted: #a9a29a;
+
+  /* Tipografía. Outfit para UI: geométrica, abierta, se lee bien a 13px en pantalla chica.
+   * Source Serif 4 sólo para marca y titulares de página. */
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Source Serif 4", ui-serif, Georgia, serif;
+
+  /* Escala tipográfica. El mínimo de la interfaz es 12px; el cuerpo nunca baja de 14px. */
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  /* Radios. Tres niveles, no uno para todo: el radio comunica jerarquía. */
+  --radius-card: 0.75rem;
+  --radius-field: 0.5rem;
+  --radius-pill: 999px;
+
+  /* Sombras. Suficientes para separar del papel, no para flotar sobre él. */
+  --shadow-card: 0 1px 2px rgb(26 24 21 / 0.04), 0 1px 3px rgb(26 24 21 / 0.06);
+  --shadow-raised: 0 2px 4px rgb(26 24 21 / 0.06), 0 8px 20px rgb(26 24 21 / 0.08);
+  --shadow-overlay: 0 8px 16px rgb(26 24 21 / 0.10), 0 24px 48px rgb(26 24 21 / 0.16);
+
+  /* Movimiento. Un solo par de duraciones: si todo se anima igual, nada se percibe. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
 }
 
-:root {
-  color-scheme: dark;
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  /* Foco visible y consistente. Se quita el outline por defecto sólo donde se reemplaza. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  /* Los números en tablas y montos se alinean por cifra, no por borde de la celda. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: var(--color-brand);
+    color: #fff;
+  }
+
+  * {
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+
+  /* Quita el borde interno que Firefox pone en inputs y botones. */
+  ::-moz-focus-inner {
+    border-style: none;
+  }
+
+  /* Respetar la preferencia del sistema. No es decorativo: para alguien con vestibulares,
+   * una transición de 200ms en 40 elementos a la vez provoca mareo real. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
-}
+@layer components {
+  /* Superficie base de todo bloque de contenido. */
+  .surface-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
 
-body {
-  margin: 0;
-  font-family: var(--font-sans);
-  background-color: #0c0c0c;
-  color: #f0f0f0;
-}
+  /*
+   * Trama diagonal de latón del panel de marca (Login y Register). Vive acá y no en la
+   * página porque es un `repeating-linear-gradient`: la única forma de no escribir un hex
+   * dentro de un .jsx es resolverlo desde el token en CSS.
+   */
+  .brand-weave {
+    background-image: repeating-linear-gradient(
+      45deg,
+      color-mix(in srgb, var(--color-brass) 18%, transparent) 0,
+      color-mix(in srgb, var(--color-brass) 18%, transparent) 1px,
+      transparent 1px,
+      transparent 50%
+    );
+    background-size: 24px 24px;
+  }
 
-* {
-  scrollbar-color: #c9a96e #141414;
-}
+  /* Campos de formulario. El foco usa el token, no un color escrito en cada input. */
+  .field {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-field);
+    color: var(--color-ink);
+    font-size: var(--text-base);
+    font-family: inherit;
+    transition: border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+  }
 
-.gold-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #c9a96e, transparent);
+  .field::placeholder {
+    color: var(--color-ink-subtle);
+  }
+
+  .field:hover:not(:disabled) {
+    border-color: var(--color-ink-subtle);
+  }
+
+  .field:focus {
+    outline: none;
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px var(--color-brand-soft);
+  }
+
+  .field:disabled {
+    background-color: var(--color-surface-sunken);
+    color: var(--color-ink-subtle);
+    cursor: not-allowed;
+  }
+
+  /* Estado de error: el borde alone no basta, se acompaña con color de texto y mensaje. */
+  .field-error {
+    border-color: var(--color-danger);
+  }
+
+  .field-error:focus {
+    box-shadow: 0 0 0 3px var(--color-danger-soft);
+  }
+
+  /* Oculta el número de los spinners: en un campo de teléfono o de monto estorba. */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 }

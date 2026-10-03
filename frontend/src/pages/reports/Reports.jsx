@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getApartadosActivos, getCitasPorDia } from '../../api/reports';
 import { todayISO, formatPrice, formatDate } from '../../utils/format';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import ErrorState from '../../components/ui/ErrorState';
+import Field from '../../components/ui/Field';
+import Input from '../../components/ui/Input';
+import LoadingState from '../../components/ui/LoadingState';
+import PageHeader from '../../components/ui/PageHeader';
+
+const TH = 'px-5 py-3 text-left text-xs font-medium text-ink-subtle';
 
 function Reports() {
   const [desde, setDesde] = useState(todayISO());
@@ -10,6 +20,8 @@ function Reports() {
   const [apartados, setApartados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // Reintento del rango por defecto: sin contador el efecto no vuelve a dispararse.
+  const [intento, setIntento] = useState(0);
 
   async function loadData() {
     setLoading(true);
@@ -32,7 +44,7 @@ function Reports() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [intento]);
 
   function handleFilterSubmit(event) {
     event.preventDefault();
@@ -50,149 +62,234 @@ function Reports() {
     { total: 0, pendientes: 0, confirmadas: 0, completadas: 0, canceladas: 0 }
   );
 
+  const falloDeCarga = Boolean(error) && !loading && resumen.length === 0 && apartados.length === 0;
+
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 font-serif text-2xl tracking-wide text-gold-400">Resumen de citas por día</h2>
-        <p className="mb-4 text-sm text-neutral-400">
-          Cantidad de citas registradas por día y su estado.
-        </p>
+      <PageHeader
+        title="Reportes"
+        description="Citas por día en el rango elegido y apartados que siguen con saldo."
+      />
 
-        <form onSubmit={handleFilterSubmit} className="mb-4 flex flex-wrap items-end gap-3">
-          <div>
-            <label htmlFor="desde" className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Desde
-            </label>
-            <input
-              id="desde"
-              type="date"
-              value={desde}
-              onChange={(event) => setDesde(event.target.value)}
-              className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
-            />
-          </div>
-          <div>
-            <label htmlFor="hasta" className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Hasta
-            </label>
-            <input
-              id="hasta"
-              type="date"
-              value={hasta}
-              onChange={(event) => setHasta(event.target.value)}
-              className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
-            />
-          </div>
-          <button
-            type="submit"
-            className="rounded-lg border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-300 transition hover:border-gold-500/50 hover:text-gold-400"
-          >
-            Filtrar
-          </button>
-        </form>
+      {falloDeCarga && (
+        <ErrorState
+          title="No pudimos cargar los reportes"
+          message="Los datos no aparecen en pantalla. Vuelve a intentarlo en un momento."
+          onRetry={() => setIntento((n) => n + 1)}
+          className="surface-card"
+        />
+      )}
 
-        {error && (
-          <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
-            {error}
-          </p>
-        )}
+      {!falloDeCarga && (
+        <>
+          <section aria-labelledby="titulo-citas">
+            <Card padding="none">
+              <div className="px-5 pt-5 pb-4">
+                <h2 id="titulo-citas" className="font-display text-lg text-ink">
+                  Resumen de citas por día
+                </h2>
+                <p className="mt-0.5 text-sm text-ink-muted">
+                  Cantidad de citas registradas por día y su estado.
+                </p>
 
-        {loading ? (
-          <p className="text-sm text-neutral-500">Cargando...</p>
-        ) : resumen.length === 0 ? (
-          <p className="text-sm text-neutral-500">No hay citas registradas en este rango.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-neutral-800 text-neutral-500">
-                  <th className="py-2 pr-4 font-medium">Fecha</th>
-                  <th className="py-2 pr-4 font-medium">Total</th>
-                  <th className="py-2 pr-4 font-medium">Pendientes</th>
-                  <th className="py-2 pr-4 font-medium">Confirmadas</th>
-                  <th className="py-2 pr-4 font-medium">Completadas</th>
-                  <th className="py-2 pr-4 font-medium">Canceladas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {resumen.map((row) => (
-                  <tr key={row.fecha} className="border-b border-neutral-800/60">
-                    <td className="py-2 pr-4 font-medium text-neutral-100">
-                      {formatDate(row.fecha)}
-                    </td>
-                    <td className="py-2 pr-4 font-semibold text-gold-500">{row.total}</td>
-                    <td className="py-2 pr-4 text-neutral-400">{row.pendientes}</td>
-                    <td className="py-2 pr-4 text-neutral-400">{row.confirmadas}</td>
-                    <td className="py-2 pr-4 text-neutral-400">{row.completadas}</td>
-                    <td className="py-2 pr-4 text-neutral-400">{row.canceladas}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t border-neutral-800 font-semibold text-neutral-100">
-                  <td className="py-2 pr-4">Total</td>
-                  <td className="py-2 pr-4 text-gold-500">{totales.total}</td>
-                  <td className="py-2 pr-4 text-neutral-300">{totales.pendientes}</td>
-                  <td className="py-2 pr-4 text-neutral-300">{totales.confirmadas}</td>
-                  <td className="py-2 pr-4 text-neutral-300">{totales.completadas}</td>
-                  <td className="py-2 pr-4 text-neutral-300">{totales.canceladas}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        )}
-      </div>
+                <form
+                  onSubmit={handleFilterSubmit}
+                  className="mt-4 flex flex-wrap items-end gap-3"
+                >
+                  <Field label="Desde" htmlFor="desde" className="w-full sm:w-44">
+                    <Input
+                      id="desde"
+                      type="date"
+                      value={desde}
+                      onChange={(event) => setDesde(event.target.value)}
+                    />
+                  </Field>
 
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-lg shadow-black/40">
-        <h2 className="mb-1 font-serif text-2xl tracking-wide text-gold-400">Apartados activos</h2>
-        <p className="mb-4 text-sm text-neutral-400">
-          Productos apartados con saldo pendiente de pago.
-        </p>
+                  <Field label="Hasta" htmlFor="hasta" className="w-full sm:w-44">
+                    <Input
+                      id="hasta"
+                      type="date"
+                      value={hasta}
+                      onChange={(event) => setHasta(event.target.value)}
+                    />
+                  </Field>
 
-        {loading ? (
-          <p className="text-sm text-neutral-500">Cargando...</p>
-        ) : apartados.length === 0 ? (
-          <p className="text-sm text-neutral-500">No hay apartados activos.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-neutral-800 text-neutral-500">
-                  <th className="py-2 pr-4 font-medium">Cliente</th>
-                  <th className="py-2 pr-4 font-medium">Producto</th>
-                  <th className="py-2 pr-4 font-medium">Monto total</th>
-                  <th className="py-2 pr-4 font-medium">Saldo pendiente</th>
-                  <th className="py-2 pr-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {apartados.map((apartado) => (
-                  <tr key={apartado.id} className="border-b border-neutral-800/60">
-                    <td className="py-2 pr-4 font-medium text-neutral-100">
-                      {apartado.cliente_nombre}
-                    </td>
-                    <td className="py-2 pr-4 text-neutral-300">{apartado.producto_nombre}</td>
-                    <td className="py-2 pr-4 text-neutral-400">
-                      {formatPrice(apartado.monto_total)}
-                    </td>
-                    <td className="py-2 pr-4 font-semibold text-gold-500">
-                      {formatPrice(apartado.saldo_pendiente)}
-                    </td>
-                    <td className="py-2 pr-4 text-right">
-                      <Link
-                        to={`/apartados/${apartado.id}`}
-                        className="text-gold-500 hover:text-gold-400"
-                      >
-                        Ver
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                  <Button type="submit" variant="secondary" loading={loading}>
+                    Filtrar
+                  </Button>
+                </form>
+              </div>
+
+              {error && !falloDeCarga && (
+                <p
+                  role="alert"
+                  className="mx-5 mb-4 rounded-field border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+                >
+                  {error}
+                </p>
+              )}
+
+              {loading && <LoadingState label="Cargando el resumen de citas" />}
+
+              {!loading && !error && resumen.length === 0 && (
+                <EmptyState
+                  title="No hay citas en ese rango"
+                  description="Ampliá las fechas de arriba para mirar más días."
+                />
+              )}
+
+              {!loading && resumen.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <caption className="sr-only">
+                      Citas por día en el rango seleccionado, desglosadas por estado.
+                    </caption>
+                    <thead>
+                      <tr className="border-b border-line">
+                        <th scope="col" className={TH}>
+                          Fecha
+                        </th>
+                        <th scope="col" className={`${TH} text-right`}>
+                          Total
+                        </th>
+                        <th scope="col" className={`${TH} text-right`}>
+                          Pendientes
+                        </th>
+                        <th scope="col" className={`${TH} text-right`}>
+                          Confirmadas
+                        </th>
+                        <th scope="col" className={`${TH} text-right`}>
+                          Completadas
+                        </th>
+                        <th scope="col" className={`${TH} text-right`}>
+                          Canceladas
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {resumen.map((row) => (
+                        <tr
+                          key={row.fecha}
+                          className="border-b border-line transition-colors duration-(--duration-fast) last:border-b-0 hover:bg-surface-sunken/70"
+                        >
+                          <td className="px-5 py-3 font-medium tabular text-ink">
+                            {formatDate(row.fecha)}
+                          </td>
+                          <td className="px-5 py-3 text-right font-semibold tabular text-ink">
+                            {row.total}
+                          </td>
+                          <td className="px-5 py-3 text-right tabular text-ink-muted">
+                            {row.pendientes}
+                          </td>
+                          <td className="px-5 py-3 text-right tabular text-ink-muted">
+                            {row.confirmadas}
+                          </td>
+                          <td className="px-5 py-3 text-right tabular text-ink-muted">
+                            {row.completadas}
+                          </td>
+                          <td className="px-5 py-3 text-right tabular text-ink-muted">
+                            {row.canceladas}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t border-line bg-surface-sunken font-semibold text-ink">
+                        <td className="px-5 py-3">Total</td>
+                        <td className="px-5 py-3 text-right tabular">{totales.total}</td>
+                        <td className="px-5 py-3 text-right tabular">{totales.pendientes}</td>
+                        <td className="px-5 py-3 text-right tabular">{totales.confirmadas}</td>
+                        <td className="px-5 py-3 text-right tabular">{totales.completadas}</td>
+                        <td className="px-5 py-3 text-right tabular">{totales.canceladas}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
+            </Card>
+          </section>
+
+          <section aria-labelledby="titulo-apartados">
+            <Card padding="none">
+              <div className="px-5 pt-5 pb-4">
+                <h2 id="titulo-apartados" className="font-display text-lg text-ink">
+                  Apartados activos
+                </h2>
+                <p className="mt-0.5 text-sm text-ink-muted">
+                  Productos apartados con saldo pendiente de pago.
+                </p>
+              </div>
+
+              {loading && <LoadingState label="Cargando los apartados activos" />}
+
+              {!loading && apartados.length === 0 && (
+                <EmptyState
+                  title="No hay apartados activos"
+                  description="Cuando un cliente aparte un producto con saldo, aparece acá."
+                />
+              )}
+
+              {!loading && apartados.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <caption className="sr-only">
+                      Productos apartados con su monto total y su saldo pendiente.
+                    </caption>
+                    <thead>
+                      <tr className="border-b border-line">
+                        <th scope="col" className={TH}>
+                          Cliente
+                        </th>
+                        <th scope="col" className={TH}>
+                          Producto
+                        </th>
+                        <th scope="col" className={`${TH} text-right`}>
+                          Monto total
+                        </th>
+                        <th scope="col" className={`${TH} text-right`}>
+                          Saldo pendiente
+                        </th>
+                        <th scope="col" className={`${TH} text-right`}>
+                          <span className="sr-only">Acciones</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {apartados.map((apartado) => (
+                        <tr
+                          key={apartado.id}
+                          className="border-b border-line transition-colors duration-(--duration-fast) last:border-b-0 hover:bg-surface-sunken/70"
+                        >
+                          <td className="px-5 py-3 font-medium text-ink">
+                            {apartado.cliente_nombre}
+                          </td>
+                          <td className="px-5 py-3 text-ink">{apartado.producto_nombre}</td>
+                          <td className="px-5 py-3 text-right tabular text-ink-muted">
+                            {formatPrice(apartado.monto_total)}
+                          </td>
+                          <td className="px-5 py-3 text-right font-semibold tabular text-ink">
+                            {formatPrice(apartado.saldo_pendiente)}
+                          </td>
+                          <td className="py-1 pr-4 pl-5 text-right">
+                            <div className="flex items-center justify-end">
+                              <Link
+                                to={`/apartados/${apartado.id}`}
+                                className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-brand hover:text-brand-deep"
+                              >
+                                Ver
+                              </Link>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Card>
+          </section>
+        </>
+      )}
     </div>
   );
 }

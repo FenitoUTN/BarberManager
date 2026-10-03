@@ -4,7 +4,24 @@ import { getSlots } from '../../api/availability';
 import { getClientOptions } from '../../api/clients';
 import { bookAppointment } from '../../api/appointments';
 import { formatPrice, formatTime, todayISO } from '../../utils/format';
+import Button from '../../components/ui/Button';
+import Field from '../../components/ui/Field';
+import Input from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
+import Textarea from '../../components/ui/Textarea';
 
+/*
+ * Reserva de turno. No renderiza una tarjeta: el que lo monta (Agenda) decide el contenedor,
+ * porque la misma pieza se usa dentro de la vista del cliente y dentro de la del barbero.
+ *
+ * Dos decisiones que no son de estilo:
+ *
+ * 1. LOS HORARIOS SON BOTONES CON `aria-pressed`, NO ENLACES DE COLOR. Elegir hora es el
+ *    único paso del formulario que no se puede hacer con teclado de sistema: el estado
+ *    seleccionado se comunica por `aria-pressed` y por el filo, no sólo por el color.
+ * 2. EL BOTÓN DE ENVIAR ESTÁ DESHABILITADO SIN HORARIO. Reservar sin hora elegida es un
+ *    error que el servidor va a rechazar igual; no enviarlo ahorra el viaje y el mensaje.
+ */
 function BookingForm({ showClientSelect = false, onBooked, onViewAppointments }) {
   const [services, setServices] = useState([]);
   const [clients, setClients] = useState([]);
@@ -88,7 +105,7 @@ function BookingForm({ showClientSelect = false, onBooked, onViewAppointments })
       }
 
       await bookAppointment(payload);
-      setSuccess('¡Cita reservada con éxito!');
+      setSuccess('Cita reservada con éxito.');
       setNotas('');
       setHoraInicio('');
       setSlots((prev) => prev.filter((slot) => slot !== horaInicio));
@@ -108,127 +125,124 @@ function BookingForm({ showClientSelect = false, onBooked, onViewAppointments })
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {showClientSelect && (
-          <div>
-            <label htmlFor="cliente" className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Cliente
-            </label>
-            <select
-              id="cliente"
-              value={clienteId}
-              onChange={(event) => setClienteId(event.target.value)}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
-            >
+          <Field label="Cliente" htmlFor="cliente">
+            <Select id="cliente" value={clienteId} onChange={(event) => setClienteId(event.target.value)}>
               {clients.map((client) => (
                 <option key={client.id} value={client.id}>
                   {client.nombre} · {client.telefono}
                 </option>
               ))}
-            </select>
-          </div>
+            </Select>
+          </Field>
         )}
 
-        <div>
-          <label htmlFor="servicio" className="mb-1.5 block text-sm font-medium text-neutral-300">
-            Servicio
-          </label>
-          <select
-            id="servicio"
-            value={servicioId}
-            onChange={(event) => setServicioId(event.target.value)}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
-          >
+        <Field label="Servicio" htmlFor="servicio">
+          <Select id="servicio" value={servicioId} onChange={(event) => setServicioId(event.target.value)}>
             {services.map((service) => (
               <option key={service.id} value={service.id}>
                 {service.nombre} · {formatPrice(service.precio)} · {service.duracion_minutos} min
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </Field>
 
-        <div>
-          <label htmlFor="fecha" className="mb-1.5 block text-sm font-medium text-neutral-300">
-            Fecha
-          </label>
-          <input
+        <Field label="Fecha" htmlFor="fecha">
+          <Input
             id="fecha"
             type="date"
             min={todayISO()}
             value={fecha}
             onChange={(event) => setFecha(event.target.value)}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           />
-        </div>
+        </Field>
       </div>
 
-      <div>
-        <p className="mb-1.5 text-sm font-medium text-neutral-300">Horario disponible</p>
-        {loadingSlots ? (
-          <p className="text-sm text-neutral-500">Buscando horarios...</p>
-        ) : slots.length === 0 ? (
-          <p className="text-sm text-neutral-500">No hay horarios disponibles para esa fecha.</p>
-        ) : (
+      {/*
+        fieldset/legend y no un <p>: el grupo de horarios es un conjunto de controles con un
+        nombre común, y eso es exactamente lo que el lector de pantalla necesita anunciar
+        antes de empezar a leer horas.
+      */}
+      <fieldset>
+        <legend className="mb-2 text-sm font-medium text-ink">Horario disponible</legend>
+
+        {loadingSlots && (
+          <p role="status" aria-live="polite" className="text-sm text-ink-muted">
+            Buscando horarios...
+          </p>
+        )}
+
+        {!loadingSlots && slots.length === 0 && (
+          <p className="text-sm text-ink-muted">
+            No hay horarios disponibles para esa fecha. Probá con otro día.
+          </p>
+        )}
+
+        {!loadingSlots && slots.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {slots.map((slot) => (
-              <button
-                key={slot}
-                type="button"
-                onClick={() => setHoraInicio(slot)}
-                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
-                  horaInicio === slot
-                    ? 'border-gold-500 bg-gold-500/10 text-gold-400'
-                    : 'border-neutral-700 text-neutral-300 hover:border-gold-500/50 hover:text-gold-400'
-                }`}
-              >
-                {formatTime(slot)}
-              </button>
-            ))}
+            {slots.map((slot) => {
+              const seleccionada = horaInicio === slot;
+
+              return (
+                <button
+                  key={slot}
+                  type="button"
+                  aria-pressed={seleccionada}
+                  onClick={() => setHoraInicio(slot)}
+                  className={`inline-flex min-h-11 items-center rounded-field border px-4 text-sm font-medium tabular transition-[background-color,border-color,color] duration-(--duration-fast) ease-out ${
+                    seleccionada
+                      ? 'border-brand bg-brand-soft font-semibold text-brand'
+                      : 'border-line-strong bg-surface text-ink hover:border-brand hover:text-brand'
+                  }`}
+                >
+                  {formatTime(slot)}
+                </button>
+              );
+            })}
           </div>
         )}
-      </div>
+      </fieldset>
 
-      <div>
-        <label htmlFor="notas" className="mb-1.5 block text-sm font-medium text-neutral-300">
-          Notas (opcional)
-        </label>
-        <textarea
+      <Field label="Notas (opcional)" htmlFor="notas">
+        <Textarea
           id="notas"
           rows={3}
           maxLength={255}
           value={notas}
           onChange={(event) => setNotas(event.target.value)}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/30"
           placeholder="Indicaciones para el barbero"
         />
-      </div>
+      </Field>
 
       {error && (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+        <p
+          role="alert"
+          className="rounded-field border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+        >
           {error}
         </p>
       )}
 
       {success && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
+        <div
+          role="status"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-field border border-success/30 bg-success-soft px-3 py-2 text-sm text-success"
+        >
           <span>{success}</span>
           {onViewAppointments && (
             <button
               type="button"
               onClick={onViewAppointments}
-              className="font-semibold text-emerald-300 hover:text-emerald-200"
+              className="min-h-11 cursor-pointer font-semibold hover:underline"
             >
-              Ver mis citas →
+              Ver mis citas
             </button>
           )}
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={submitting || !horaInicio}
-        className="w-full rounded-lg bg-gold-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-gold-600/30 transition hover:bg-gold-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-6"
-      >
-        {submitting ? 'Reservando...' : 'Reservar turno'}
-      </button>
+      <Button type="submit" loading={submitting} disabled={!horaInicio}>
+        Reservar turno
+      </Button>
     </form>
   );
 }
