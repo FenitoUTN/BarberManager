@@ -1,0 +1,63 @@
+name: Preview en GitHub Pages
+
+# Publica el build del frontend como preview estático. No reemplaza al despliegue real
+# (Express + MySQL sirve la app completa en un solo servicio): acá sólo se ve el
+# rediseño, porque no hay API detrás. Sirve para mirar pantallas sin levantar nada.
+on:
+  push:
+    branches: ['main', 'redesign/frontend-ux']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build del frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci --prefix frontend
+
+      # VITE_BASE es lo que cambia el prefijo de los assets y del router respecto del
+      # build que sirve Express; ver frontend/vite.config.js.
+      - name: Build
+        run: npm run build --prefix frontend
+        env:
+          VITE_BASE: /BarberManager/
+
+      # GitHub Pages responde 404.html ante cualquier ruta profunda (/BarberManager/apartados).
+      # Copiando el index ahí la SPA se hidrata con la URL original en vez de enseñar 404.
+      - name: Fallback SPA
+        run: cp frontend/dist/index.html frontend/dist/404.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    name: Publicar
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

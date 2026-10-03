@@ -18,4 +18,12 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // Los archivos de configuración corren en Node, no en el navegador: `process` es
+    // válido ahí aunque el bloque de arriba declare los globals de browser.
+    files: ['*.config.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])
