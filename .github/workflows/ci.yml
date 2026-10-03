@@ -1,0 +1,52 @@
+name: CI
+
+# Un cambio no se considera terminado hasta que los tres gates pasan: lint, build y
+# tests. Antes de que este archivo existiera, el sistema no tenía ninguna red: por eso
+# convivieron con un puerto desalineado y con el lint en rojo sin que nadie lo notara.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  verificar:
+    name: Lint, build y tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: |
+          npm ci --prefix backend
+          npm ci --prefix frontend
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Tests
+        run: npm test
+
+      # Los tests unitarios del backend no tocan la base de datos a propósito. Este
+      # paso deja constancia de esa limitación en lugar de dejarla implícita: si algún
+      # día un test necesita MySQL, tiene que hacerlo explícito y no por accidente.
+      - name: Verificar que los tests no dependen de MySQL
+        run: |
+          if grep -rIl --include='*.js' -E "require\('\.\./src/config/db'\)|require\(\"\.\./src/config/db\"\)" backend/test/; then
+            echo "::error::Un test unitario importa el pool de MySQL. Sepáralo en un test de integración."
+            exit 1
+          fi
+          echo "Los tests unitarios no importan el pool de la base de datos."

@@ -1,0 +1,21 @@
+# Dependencias y secretos que nunca deben versionarse.
+# El repositorio tiene además un .gitignore en backend/ y frontend/, pero sin este
+# archivo raíz nada impedía agregar un node_modules o un .env desde la raíz.
+
+node_modules/
+.env
+.env.*
+!.env.example
+
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+.DS_Store
+Thumbs.db
+
+dist/
+build/
+coverage/
