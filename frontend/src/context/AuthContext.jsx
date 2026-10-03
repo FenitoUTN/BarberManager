@@ -25,6 +25,18 @@ export function AuthProvider({ children }) {
     loadUser();
   }, []);
 
+  // Una llamada en vuelo que recibe 401 significa que la sesión ya no vale, aunque
+  // AuthContext todavía la considere activa. Al limpiar el usuario, ProtectedRoute
+  // redirige a /login en el siguiente render.
+  useEffect(() => {
+    function handleUnauthorized() {
+      setUser(null);
+    }
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, []);
+
   async function login(email, password) {
     const { data } = await axiosClient.post('/auth/login', { email, password });
     setUser(data.user);
